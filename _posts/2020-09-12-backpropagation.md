@@ -31,7 +31,7 @@ author: Xiyun Song
 <p>The example network model is illustrated in Figure 1. It consists of two layers (BatchNorm module and activator Sigmoid) followed by a mean square error (MSE) loss module. Let’s take a look at the forward pass (from bottom to top).</p>
 
 <p align="center">
- <img src="{{ "/assets/Model1.png" | relative_url }}"  style="border:solid; color:gray" width="350"> 
+ <img src="{{ "/assets/Model1.png" | relative_url }}" style="border:solid; color:gray" width="350"> 
 <br>Figure 1 Illustration of the example network. 
 </p> 
 
