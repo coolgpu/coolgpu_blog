@@ -31,7 +31,7 @@ author: Xiyun Song
 <p>The example network model is illustrated in Figure 1. It consists of two layers (BatchNorm module and activator Sigmoid) followed by a mean square error (MSE) loss module. Let’s take a look at the forward pass (from bottom to top).</p>
 
 <p align="center">
- <img src="{{ "/assets/Model1.png" | relative_url }}" style="border:solid; color:gray" width="350"> 
+ <img src="{{ "/assets/images/Model1.png" | relative_url }}" style="border:solid; color:gray" width="350"> 
 <br>Figure 1 Illustration of the example network. 
 </p> 
 
@@ -169,7 +169,7 @@ author: Xiyun Song
 <p>Derivation of gradient w.r.t \(\vec x\) is more complicated than \(\vec w\) and \(\vec \beta \) because each \({x_{c,i} }\) directly contributes to \({y_{c,i} }\) and also indirectly contributes to other \({y_{c,k} }\) elements via \({\mu _c}\left( { {x_{c,1} }, \ldots ,{x_{c,{N_i} } } } \right)\) and \({\sigma ^2}_c\left( { {x_{c,1} }, \ldots ,{x_{c,{N_i} } } } \right)\), as shown in Figure 2. To help understand the underneath logic, we will demonstrate two different ways to solve this challenge and achieve the same solution. </p>
 
 <p align="center">
- <img src="{{ "/assets/Model2.png" | relative_url }}" style="border:solid; color:gray" width="350">
+ <img src="{{ "/assets/images/Model2.png" | relative_url }}" style="border:solid; color:gray" width="350">
  <div class="thecap" style="text-align:center">Figure 2 Illustration of the contribution paths</div>
 </p> 
 
