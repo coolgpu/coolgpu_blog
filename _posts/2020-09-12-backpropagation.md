@@ -6,6 +6,7 @@ title:  "Understanding Backpropagation of Neural Networks Using an Example with 
 date:   2020-09-12 17:00:41 -0700
 categories: github pages
 author: Xiyun Song
+comments: true
 ---
 
 <p>A neural network model typically learns from iterative training processes to optimize values for its trainable parameters. The major steps in each iteration include forward pass, loss calculation, backward pass and parameter update. </p>
@@ -352,7 +353,7 @@ From Figure 2, we see that, given \({x_{c,i} }\), it has only 3 direct contribut
 
 <p>To serve as a reference for comparison, the same network was also implemented using PyTorch’s built-in modules of BatchNorm, Sigmoid and MSELoss. The network output, loss, gradients of the loss w.r.t. \(\vec w\), \(\vec \beta \) and \(\vec x\) from the custom implementations were compared to the reference and the results matched. </p>
 
-<p>You can find <a href="https://github.com/coolgpu/backpropagation_w_example/blob/master/src/batchnorm_sigmoid_mse_network.py">the source code on GitHub</a>. </p>
+<p>You can find <a href="https://github.com/coolgpu/backpropagation_w_example/blob/master/src/batchnorm_sigmoid_mse_network.py">the source code on GitHub</a>. If you like, you can also implement using Tensorflow as well to gain hands-on experience. </p> 
 
 
 <h3><a name="_Summary"></a>4. Summary </h3>
