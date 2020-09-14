@@ -4,4 +4,4 @@ title: About
 permalink: /about/
 ---
 
-Share fun on AI, machine learning, deep learning, image processing, image reconstruction and other stuffs
+It's fun to share on AI, machine learning, deep learning, image processing, image reconstruction and other stuffs

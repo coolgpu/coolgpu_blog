@@ -7,9 +7,12 @@ author: Xiyun Song
 ---
 <p>It is a busy but pretty happy learning expereience in the past two days during the pandemic. </p>
 <ul>
-  <li>Basics of html with css and javascript. 
-  <li>Basics of MathJax and how to convert equations in Office Word to what MathJax supports so that they can be displayed properly and beautifully in html.
-  <li>Basics of Git and Github Pages. 
-  <li>Basics of Jekyll to build blogs for Github Pages. 
+  <li>Basics of html with css and javascript. </li>
+  <li>Basics of MathJax and how to convert equations in Office Word to what MathJax supports so that they can be displayed properly and beautifully in html.</li>
+  <li>Basics of Git and Github Pages. </li>
+  <li>Basics of Jekyll to build blogs for Github Pages. </li>
+  <li>Some tricks to solve the conflict between MathJax and Jekyll using kramdown for markdown. </li>
+  <li>Comment section embed for websites. </li>
 </ul> 
+<p>Cheers! </p>
 
