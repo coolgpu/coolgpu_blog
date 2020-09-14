@@ -223,8 +223,8 @@ Using the chain rule, we have
 	<span class="ref-num">(22)</span>
 </div>
 
-<h5>2.5.2 Solution 2 for derivation of gradient \(\frac{ {\partial L} }{ {\partial \vec x} }\)   </h5>
-Solution 2 is very similar to another very nice post by Kevin Zakka<sup>[<a href="#_Reference3">3</a>]</sup>. From Figure 2, we see that, given \({x_{c,i} }\), it has only 3 direct contribution paths to \({y_{c,i} }\), \({\mu _c}\) and \({\sigma ^2}_c\), as highlighted using bold red arrow. Therefore using the chain rule from this perspective, we have the second solution:
+<h5>2.5.2 Solution 2 for derivation of gradient \(\frac{ {\partial L} }{ {\partial \vec x} }\) </h5>
+<p>Solution 2 is very similar to another very nice post by Kevin Zakka<sup>[<a href="#_Reference3">3</a>]</sup>. From Figure 2 above, we see that, given \({x_{c,i} }\), it has only 3 direct contribution paths to \({y_{c,i} }\), \({\mu _c}\) and \({\sigma ^2}_c\), as highlighted using bold red arrow. Therefore using the chain rule from this perspective, we have the second solution:</P>
 
 <div class="alert alert-secondary equation">
 	<span> \(\frac{ {\partial L} }{ {\partial {x_{c,i} } } } = \frac{ {\partial L} }{ {\partial {y_{c,i} } } }\frac{ {\partial {y_{c,i} } } }{ {\partial {x_{c,i} } } } + \frac{ {\partial L} }{ {\partial {\mu _c} } }\frac{ {\partial {\mu _c} } }{ {\partial {x_{c,i} } } } + \frac{ {\partial L} }{ {\partial \sigma _c^2} }\frac{ {\partial \sigma _c^2} }{ {\partial {x_{c,i} } } }\)</span><span class="ref-num">(23)</span>
