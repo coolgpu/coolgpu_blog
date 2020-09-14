@@ -2,7 +2,7 @@
 layout: post
 mathjax: true
 title:  "Understanding Backpropagation of Neural Networks Using an Example with Step-by-step Derivation and Custom Implementations"
-date:   2020-09-12 17:00:41 -0700
+date:   2020-09-13 17:00:41 -0700
 categories: github pages
 author: Xiyun Song
 ---
@@ -12,18 +12,19 @@ author: Xiyun Song
 <li>The forward pass is the process to compute outputs from input. </li>
 <li>Compute loss that is simply a scalar number indicating the disparity betwen the model's predicted output and the ground truth. </li>
 <li>The backward pass is the process to compute gradients of the loss with respect to (w.r.t.) each trainable parameter, which indicates how much the parameters need to change in the negative direction to minimize the loss. </li>
-<li>Update the trainable parameters based on their gradients using a certain algorithm e.g. Adam so that the loss decreases.</li>
+<li>Update the trainable parameters based on their gradients using a certain algorithm e.g. Adam<sup>[<a href="#_Reference1">1</a>]</sup> so that the loss decreases.</li>
 </ul> 
 
 <p>Among these steps, the backward pass, which is typically done using backpropagation with chain rule to effectively compute gradients, is the most complex. Fortunately, we are required to define only the forward pass when building a neural network and popular deep learning frameworks such as PyTorch and Tensorflow will do backpropagation for us automatically, referred to as Autograd. While this brings convenience, it also causes confusion around backpropagation, the heart of every neural network. In fact, a clear understanding and hands-on experience with backpropagation is critical for anyone who would like to be an AI expert. Therefore, in this post, I would like to use a simple network example to demonstrate how to compute gradients using the chain rule and manually implement it. Hopefully, this could help those of us with some basic knowledge of neural network and calculus to gain a more solid understanding of it. </p>
 
 <p>This post is organized in the following sections: </p>
 <ul>
-<li><a href="#_The_simple_network">The simple network model</a></li>
-<li><a href="#_Derivation_of_the_gradients">Derivation of gradients using backpropagation chain rule</a></li>
-<li><a href="#_Custom_implementations_and_validation">Custom implementations and validation </a></li>
-<li><a href="#_Summary">Summary</a></li>
-<li><a href="#_Extra">Extra</a></li>
+	<li><a href="#_The_simple_network">The simple network model</a></li>
+	<li><a href="#_Derivation_of_the_gradients">Derivation of gradients using backpropagation chain rule</a></li>
+	<li><a href="#_Custom_implementations_and_validation">Custom implementations and validation </a></li>
+	<li><a href="#_Summary">Summary</a></li>
+	<li><a href="#_Extra">Extra</a></li>
+	<li><a href="#_References">References</a></li>
 </ul>
 
 <h3><a name="_The_simple_network"></a>1. The simple network model</h3>  
@@ -42,7 +43,7 @@ author: Xiyun Song
 
 <p>where \(s \in \left[ {1,\;{N_s} } \right]\), \(c \in \left[ {1,\;{N_c} } \right]\) and \(k \in \left[ {1,\;{N_k} } \right]\) are the indices along individual dimesions.</p>
 
-<p><strong>BatchNorm layer</strong>: a module that was proposed by [Ioffe and Szegedy] and is widely used in neural networks to help make the training faster and more stable through normalization of the batch data by re-centering and re-scaling. BatchNorm is applied across all samples in the batch but for each feature channel separately. The blue color of the data in Figure 1 represents one channel. The output \(\vec y\) from BatchNorm is computed as </p>
+<p><strong>BatchNorm layer</strong>: a module that was proposed by Ioffe and Szegedy<sup>[<a href="#_Reference2">2</a>]</sup> and is widely used in neural networks to help make the training faster and more stable through normalization of the batch data by re-centering and re-scaling. BatchNorm is applied across all samples in the batch but for each feature channel separately. The blue color of the data in Figure 1 represents one channel. The output \(\vec y\) from BatchNorm is computed as </p>
 
 <div class="alert alert-secondary equation">
 	<span>\({y_{s,c,k} } = {w_c} \cdot \frac{ { {x_{s,c,k} } - {\mu _c} } }{ {\sqrt {\sigma _c^2} } } + {\beta _c}\) </span><span class="ref-num"> (2)</span>
@@ -110,7 +111,6 @@ author: Xiyun Song
 <li>Summation means that all possible paths through which \({x_i}\) contributes to \(L\) should be included</li>
 <li>Product means that, along each path \(m\), the output gradient equals the upstream passed in, \(\frac{ {\partial L} }{ {\partial {f_m} } }\), times the local gradient, \(\frac{ {\partial {f_m} } }{ {\partial {x_i} } }\). </li>
 </ul>
-<br>
 
 <h4>2.2 Dimensions of the gradients</h4>
 <p>Please note that, the loss function in a neural network gives a scalar value output loss. The gradient of the loss w.r.t. any trainable parameter or input variable should have the same dimension as that parameter or variable, whether it is another scalar, or a 1-D vector, or N-D array. </p>
@@ -224,7 +224,7 @@ Using the chain rule, we have
 </div>
 
 <h5>2.5.2 Solution 2 for derivation of gradient \(\frac{ {\partial L} }{ {\partial \vec x} }\)   </h5>
-From Figure 2, we see that, given \({x_{c,i} }\), it has only 3 direct contribution paths to \({y_{c,i} }\), \({\mu _c}\) and \({\sigma ^2}_c\), as highlighted using bold red arrow. Therefore using the chain rule from this perspective, we have the second solution:
+Solution 2 is very similar to another very nice post by Kevin Zakka<sup>[<a href="#_Reference3">3</a>]</sup>. From Figure 2, we see that, given \({x_{c,i} }\), it has only 3 direct contribution paths to \({y_{c,i} }\), \({\mu _c}\) and \({\sigma ^2}_c\), as highlighted using bold red arrow. Therefore using the chain rule from this perspective, we have the second solution:
 
 <div class="alert alert-secondary equation">
 	<span> \(\frac{ {\partial L} }{ {\partial {x_{c,i} } } } = \frac{ {\partial L} }{ {\partial {y_{c,i} } } }\frac{ {\partial {y_{c,i} } } }{ {\partial {x_{c,i} } } } + \frac{ {\partial L} }{ {\partial {\mu _c} } }\frac{ {\partial {\mu _c} } }{ {\partial {x_{c,i} } } } + \frac{ {\partial L} }{ {\partial \sigma _c^2} }\frac{ {\partial \sigma _c^2} }{ {\partial {x_{c,i} } } }\)</span><span class="ref-num">(23)</span>
@@ -312,7 +312,7 @@ From Figure 2, we see that, given \({x_{c,i} }\), it has only 3 direct contribut
 <p>Equation (29) is identical to Equation (22): two solutions, the same answer. We took this effort to demonstrate that a problem can be solved using different solutions. Derivation is done! </p>
 
 <h3><a name="_Custom_implementations_and_validation"></a>3. Custom implementations and validation  </h3>
-<p>Two separate implementations of the forward pass, loss calculation, and backpropagation are demonstrated in this post. The 1st one uses PyTorch and the 2nd one uses Numpy. The functions and corresponding equations are summarized in Table 1. </p>
+<p>Two separate implementations of the forward pass, loss calculation, and backpropagation are demonstrated in this post. The 1st one uses PyTorch and the 2nd one uses Numpy. The functions and corresponding equations are summarized in Table below. </p>
 
 <table>
   <tr>
@@ -349,7 +349,7 @@ From Figure 2, we see that, given \({x_{c,i} }\), it has only 3 direct contribut
 
 <p>A small constant number \(\epsilon = 1E-5\) is added to \(\sigma _c^2\) in order to avoid divide-by-zero exception just in case, just as done by the PyTorch built-in BatchNorm. </p>
 
-<p>To serve as a reference for comparison, the same network was also implemented using PyTorch’s built-in modules of BatchNorm, Sigmoid and MSELoss. The network output, loss, gradients of the loss w.r.t. \(\vec w\), \(\vec \beta \) and \(\vec x\) from the custom implementations were compared to the reference and the results matched. </p>
+<p>To serve as a reference for comparison, the same network was also implemented using PyTorch’s built-in modules of BatchNorm<sup>[<a href="#_Reference4">4</a>]</sup>, Sigmoid and MSELoss. The network output, loss, gradients of the loss w.r.t. \(\vec w\), \(\vec \beta \) and \(\vec x\) from the custom implementations were compared to the reference and the results matched. </p>
 
 <p>You can find <a href="https://github.com/coolgpu/backpropagation_w_example/blob/master/src/batchnorm_sigmoid_mse_network.py">the source code on GitHub</a>. If you like, you can also implement using Tensorflow as well to gain hands-on experience. </p> 
 
@@ -375,6 +375,16 @@ From Figure 2, we see that, given \({x_{c,i} }\), it has only 3 direct contribut
 	</code>
 </pre>
 
+<h3><a name="_References"></a>6. References</h3> 
+<ul>
+	<li><a name="_Reference1"></a>[1] Diederik P. Kingma and Jimmy Lei Ba (2014). <a href="https://arxiv.org/abs/1412.6980">Adam : A method for stochastic optimization.</a></li>
+	<li><a name="_Reference2"></a>[2] Sergey Ioffe and Christian Szegedy (2015). <a href="https://arxiv.org/abs/1502.03167">Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift.</a></li>
+	<li><a name="_Reference3"></a>[3] Kevin Zakka (2016). <a href="https://kevinzakka.github.io/2016/09/14/batch_normalization/">Deriving the Gradient for the Backward Pass of Batch Normalization.</a></li>
+	<li><a name="_Reference4"></a>[4] PyTorch documentation. <a href="https://pytorch.org/docs/stable/generated/torch.nn.BatchNorm3d.html">BatchNorm3d.</a></li>	
+</ul>
+<br>
+
+
 <div id="HCB_comment_box">
 <a href="http://www.htmlcommentbox.com"></a> is loading comments...
 </div>
@@ -385,7 +395,7 @@ if(!window.hcb_user){hcb_user={};}
 	var s=document.createElement("script"), l=hcb_user.PAGE || (""+window.location).replace(/'/g,"%27"), h="https://www.htmlcommentbox.com";
 	s.setAttribute("type","text/javascript");
 	s.setAttribute("src", h+"/jread?page="+encodeURIComponent(l).replace("+","%2B")+"&opts=16862&num=10&ts=1599873842684");
-	if (typeof s!="undefined") document.getElementsByTagName("head")[0].appendChild(s);})(); /*-->*/ 
+	if (typeof s!="undefined") document.getElementsByTagName("head")[0].appendChild(s);})(); 
 </script>
 
 
