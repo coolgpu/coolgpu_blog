@@ -8,11 +8,6 @@ layout: default
   {%- endif -%}
   
   {{ content }}
-  <p>this_page_url is {{ page.url | absolute_url }}</p>
-  <p>this_page_identifier is {{ page.url | absolute_url }}</p>
-  {%- if site.disqus.shortname -%}
-    {%- include disqus_comments.html -%}
-  {%- endif -%}
 
   {%- if site.posts.size > 0 -%}
     <h2 class="post-list-heading">{{ page.list_title | default: "Posts" }}</h2>
