@@ -10,11 +10,6 @@ comments: true
 
   <div class="post-content">
     {{ content }}
-    <p>this_page_url is {{ page.url | absolute_url }}</p>
-    <p>this_page_identifier is {{ page.url | absolute_url }}</p>
-    {%- if site.disqus.shortname -%}
-      {% include disqus_comments.html %}
-    {%- endif -%}
   </div>
 
 </article>
