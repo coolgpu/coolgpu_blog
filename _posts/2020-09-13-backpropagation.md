@@ -2,7 +2,7 @@
 layout: post
 mathjax: true
 title:  "Understanding Backpropagation of Neural Networks Using an Example with Step-by-step Derivation and Custom Implementations"
-date:   2020-09-13 17:00:41 -0700
+date:   2020-09-13 21:46:41 -0700
 categories: github pages
 author: Xiyun Song
 ---
@@ -382,8 +382,8 @@ Using the chain rule, we have
 	<li><a name="_Reference3"></a>[3] Kevin Zakka (2016). <a href="https://kevinzakka.github.io/2016/09/14/batch_normalization/">Deriving the Gradient for the Backward Pass of Batch Normalization.</a></li>
 	<li><a name="_Reference4"></a>[4] PyTorch documentation. <a href="https://pytorch.org/docs/stable/generated/torch.nn.BatchNorm3d.html">BatchNorm3d.</a></li>	
 </ul>
-<br>
 
+<br>
 
 <div id="HCB_comment_box">
 <a href="http://www.htmlcommentbox.com"></a> is loading comments...
