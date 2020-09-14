@@ -1,7 +1,6 @@
 ---
 layout: post
 mathjax: true
-comments: true
 title:  "Understanding Backpropagation of Neural Networks Using an Example with Step-by-step Derivation and Custom Implementations"
 date:   2020-09-12 17:00:41 -0700
 categories: github pages
@@ -377,7 +376,7 @@ From Figure 2, we see that, given \({x_{c,i} }\), it has only 3 direct contribut
 	</code>
 </pre>
 
-{% include disqus_comments.html %}
+# <!-- {% include disqus_comments.html %} -->
 
 
 

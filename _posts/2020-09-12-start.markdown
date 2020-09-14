@@ -13,5 +13,3 @@ author: Xiyun Song
   <li>Basics of Jekyll to build blogs for Github Pages. 
 </ul> 
 
- {%- include head.html -%}
-
