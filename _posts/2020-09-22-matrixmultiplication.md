@@ -35,7 +35,7 @@ author: Xiyun Song
 	<span>\(\boldsymbol {A}  = \left[ {\begin{array}{*{20}{c} }{ {a_{11} } }&{ {a_{12} } }& \ldots &{ {a_{1k} } }\\{ {a_{21} } }&{ {a_{22} } }& \ldots &{ {a_{2k} } }\\ \vdots & \vdots & \ddots & \vdots \\{ {a_{m1} } }&{ {a_{m2} } }& \ldots &{ {a_{mk} } }\end{array} } \right]\) and \(\boldsymbol {B}  = \left[ {\begin{array}{*{20}{c} }{ {b_{11} } }&{ {b_{12} } }& \ldots &{ {b_{1n} } }\\{ {b_{21} } }&{ {b_{22} } }& \ldots &{ {b_{2n} } }\\ \vdots & \vdots & \ddots & \vdots \\{ {b_{k1} } }&{ {b_{k2} } }& \ldots &{ {b_{kn} } }\end{array} } \right]\),	</span><span class="ref-num"> (1) </span>
 </div>
 
-<p>their matrix product \(\boldsymbol {C}  = AB\) is defined as </p>
+<p>their matrix product \(\boldsymbol {C}  = \boldsymbol{A}\boldsymbol{B}\) is defined as </p>
 
 <div class="alert alert-secondary equation">
 	<span>\(\boldsymbol {C}  = \left[ {\begin{array}{*{20}{c} }{ {c_{11} } }&{ {c_{12} } }& \ldots &{ {c_{1n} } }\\{ {c_{21} } }&{ {c_{22} } }& \ldots &{ {c_{2n} } }\\ \vdots & \vdots &{ {c_{ij} } }& \vdots \\{ {c_{m1} } }&{ {c_{m2} } }& \ldots &{ {c_{mn} } }\end{array} } \right]\),	</span><span class="ref-num"> (2) </span>
@@ -51,7 +51,7 @@ author: Xiyun Song
 
 <h3><a name="_Derivation_of_the_gradients"></a>2. Derivation of the gradients</h3>
 <h4>2.1. Dimensions of the gradients</h4>
-<p>If we are considering an isolated matrix multiplication, the partial derivative matrix \(\boldsymbol {C} \) with respect to either matrix \(\boldsymbol {A} \) and matrix \(\boldsymbol {B} \) would be a 4-D hyper-space relationship, referred to as Jacobian Matrix. You will also find that there will be many zeros in the 4-D Jacobian Matrix because, as shown in Equation (3), \({c_{ij} }\) is a function of only the \(i\)th row of \(\boldsymbol {A} \) and the \(j\)th column of \(\boldsymbol {B} \), and independent of other rows of \(\boldsymbol {A} \) and other columns of \(\boldsymbol {B} \). </p>
+<p>If we are considering an isolated matrix multiplication, the partial derivative matrix \(\boldsymbol {C} \) with respect to either matrix \(\boldsymbol {A} \) and matrix \(\boldsymbol {B} \) would be a 4-D hyper-space relationship, referred to as <a href="https://en.wikipedia.org/wiki/Jacobian_matrix_and_determinant">Jacobian Matrix</a>. You will also find that there will be many zeros in the 4-D Jacobian Matrix because, as shown in Equation (3), \({c_{ij} }\) is a function of only the \(i\)th row of \(\boldsymbol {A} \) and the \(j\)th column of \(\boldsymbol {B} \), and independent of other rows of \(\boldsymbol {A} \) and other columns of \(\boldsymbol {B} \). </p>
 
 <p>What we are considering here is not an isolated matrix multiplication. Instead, we are talking about matrix multiplication inside a neural network that will have a scalar loss function. For example, consider a simple case where the loss \(L\) is the mean of matrix \(\boldsymbol {C} \):</p>
 
@@ -159,7 +159,7 @@ author: Xiyun Song
 	<span>\(\frac{ {\partial L} }{ {\partial \boldsymbol {A} } } = \frac{ {\partial L} }{ {\partial \boldsymbol {C} } }{\boldsymbol {B} ^T}\)</span><span class="ref-num">(13)</span>
 </div>
 
-<p> Let’s check the dimensions. On the left hand side of Equation (13), \(\frac{ {\partial L} }{ {\partial \boldsymbol {A} } }\) has a dimension of \(m \times k\). On the right hand side,  \(\frac{ {\partial L} }{ {\partial \boldsymbol {C} } }\) has a dimension of \(m \times n\) and \({\boldsymbol {B} ^T}\) has a dimension of \(n \times k\); thereforef their matrix product has a dimension of \(m \times k\) and matches that of \(\frac{ {\partial L} }{ {\partial \boldsymbol {A} } }\). </p>
+<p> Equation (13) shows that, for \(\boldsymbol {C}  = \boldsymbol{A}\boldsymbol{B}\), the derivative of the loss \( L \) w.r.t to matrix \(\boldsymbol {A} \) equals the upstream derivative \(\frac{ {\partial L} }{ {\partial \boldsymbol {C} } }\) times the transpose of matrix \(\boldsymbol {B} \). Let’s check the dimensions. On the left hand side of Equation (13), \(\frac{ {\partial L} }{ {\partial \boldsymbol {A} } }\) has a dimension of \(m \times k\). On the right hand side,  \(\frac{ {\partial L} }{ {\partial \boldsymbol {C} } }\) has a dimension of \(m \times n\) and \({\boldsymbol {B} ^T}\) has a dimension of \(n \times k\); thereforef their matrix product has a dimension of \(m \times k\) and matches that of \(\frac{ {\partial L} }{ {\partial \boldsymbol {A} } }\). </p>
 
 
 <h4>2.4 Derivation of the gradient \(\frac{ {\partial L} }{ {\partial  \boldsymbol {\boldsymbol {B} } } }\)  </h4> 
@@ -179,7 +179,7 @@ author: Xiyun Song
 
         <p><span> \(\frac{ {\partial {c_{23} } } }{ {\partial {b_{12} } } } = 0\) </span></p>
 	</span>
-	<span class="ref-num">(13)</span>
+	<span class="ref-num">(14)</span>
 </div>
 
 <p> Using the chain rule, we have the partial derivative of the loss \(L\) w.r.t. \({b_{12} }\) </p>
@@ -192,7 +192,7 @@ author: Xiyun Song
 
 		
 	</span>
-	<span class="ref-num">(14)</span>
+	<span class="ref-num">(15)</span>
 </div>
 
 <p> Following a similar manner again, we can derive the other elements of \(\frac{ {\partial L} }{ {\partial \boldsymbol {B} } }\) as shown below </p>
@@ -204,33 +204,35 @@ author: Xiyun Song
         <p><span> \(= \left[ {\begin{array}{*{20}{c} }{ { {a_{11} }\frac{ {\partial L} }{ {\partial {c_{11} } } } + {a_{21} }\frac{ {\partial L} }{ {\partial {c_{21} } } } } }&{ { {a_{11} }\frac{ {\partial L} }{ {\partial {c_{12} } } } + {a_{21} }\frac{ {\partial L} }{ {\partial {c_{22} } } } } }&{ { {a_{11} }\frac{ {\partial L} }{ {\partial {c_{13} } } } + {a_{21} }\frac{ {\partial L} }{ {\partial {c_{23} } } } } }\\{ { {a_{12} }\frac{ {\partial L} }{ {\partial {c_{11} } } } + {a_{22} }\frac{ {\partial L} }{ {\partial {c_{21} } } } } }&{ { {a_{12} }\frac{ {\partial L} }{ {\partial {c_{12} } } } + {a_{22} }\frac{ {\partial L} }{ {\partial {c_{22} } } } } }&{ { {a_{12} }\frac{ {\partial L} }{ {\partial {c_{13} } } } + {a_{22} }\frac{ {\partial L} }{ {\partial {c_{23} } } } } }\\{           { {a_{13} }\frac{ {\partial L} }{ {\partial {c_{11} } } } + {a_{23} }\frac{ {\partial L} }{ {\partial {c_{21} } } } } }&{ { {a_{13} }\frac{ {\partial L} }{ {\partial {c_{12} } } } + {a_{23} }\frac{ {\partial L} }{ {\partial {c_{22} } } } } }&{ { {a_{13} }\frac{ {\partial L} }{ {\partial {c_{13} } } } + {a_{23} }\frac{ {\partial L} }{ {\partial {c_{23} } } } } }\\{              { {a_{14} }\frac{ {\partial L} }{ {\partial {c_{11} } } } + {a_{24} }\frac{ {\partial L} }{ {\partial {c_{21} } } } } }&{ { {a_{14} }\frac{ {\partial L} }{ {\partial {c_{12} } } } + {a_{24} }\frac{ {\partial L} }{ {\partial {c_{22} } } } } }&{ { {a_{14} }\frac{ {\partial L} }{ {\partial {c_{13} } } } + {a_{24} }\frac{ {\partial L} }{ {\partial {c_{23} } } } } }\end{array} } \right]\)  </span></p>
 		
 	</span>
-	<span class="ref-num">(15)</span>
+	<span class="ref-num">(16)</span>
 </div>
 
 <p>This can be rewritten as a matrix product.</p>
 
 <div class="alert alert-secondary equation">
-	<span>\(\frac{ {\partial L} }{ {\partial \boldsymbol {B} } } = \left[ {\begin{array}{*{20}{c} }{ {a_{11} } }&{ {a_{21} } }\\{ {a_{12} } }&{ {a_{22} } }\\{ {a_{13} } }&{ {a_{23} } }\\{ {a_{14} } }&{ {a_{24} } }\end{array} } \right]\left[ {\begin{array}{*{20}{c} }{\frac{ {\partial L} }{ {\partial {c_{11} } } } }&{\frac{ {\partial L} }{ {\partial {c_{12} } } } }&{\frac{ {\partial L} }{ {\partial {c_{13} } } } }\\{\frac{ {\partial L} }{ {\partial {c_{21} } } } }&{\frac{ {\partial L} }{ {\partial {c_{22} } } } }&{\frac{ {\partial L} }{ {\partial {c_{23} } } } }\end{array} } \right]\)</span><span class="ref-num">(16)</span>
+	<span>\(\frac{ {\partial L} }{ {\partial \boldsymbol {B} } } = \left[ {\begin{array}{*{20}{c} }{ {a_{11} } }&{ {a_{21} } }\\{ {a_{12} } }&{ {a_{22} } }\\{ {a_{13} } }&{ {a_{23} } }\\{ {a_{14} } }&{ {a_{24} } }\end{array} } \right]\left[ {\begin{array}{*{20}{c} }{\frac{ {\partial L} }{ {\partial {c_{11} } } } }&{\frac{ {\partial L} }{ {\partial {c_{12} } } } }&{\frac{ {\partial L} }{ {\partial {c_{13} } } } }\\{\frac{ {\partial L} }{ {\partial {c_{21} } } } }&{\frac{ {\partial L} }{ {\partial {c_{22} } } } }&{\frac{ {\partial L} }{ {\partial {c_{23} } } } }\end{array} } \right]\)</span><span class="ref-num">(17)</span>
 </div>
 
 <p> In fact, the first matrix is the transpose of \(\boldsymbol {A} \) and the second matrix is the upstream derivative \(\frac{ {\partial L} }{ {\partial \boldsymbol {C} } }\). Then we have  </p>
 
 <div class="alert alert-secondary equation">
-	<span> \(\frac{ {\partial L} }{ {\partial \boldsymbol {B} } } = {\boldsymbol {A} ^T}\frac{ {\partial L} }{ {\partial \boldsymbol {C} } }\) </span><span class="ref-num">(17)</span>
+	<span> \(\frac{ {\partial L} }{ {\partial \boldsymbol {B} } } = {\boldsymbol {A} ^T}\frac{ {\partial L} }{ {\partial \boldsymbol {C} } }\) </span><span class="ref-num">(18)</span>
 </div>
 
-<p> Let’s check the dimensions once more. On the left hand side of Equation (17), \(\frac{ {\partial L} }{ {\partial \boldsymbol {B} } }\) has a dimension of \(k \times n\), the same as \(\boldsymbol {B} \). On the right hand side, \({\boldsymbol {A} ^T}\) has a dimension of \(k \times m\) and \(\frac{ {\partial L} }{ {\partial \boldsymbol {C} } }\) has a dimension of \(m \times n\); therefore, their matrix product has a dimension of \(k \times n\) and matches that of \(\frac{ {\partial L} }{ {\partial \boldsymbol {B} } }\). </p>
+<p> Equation (18) shows that, for \(\boldsymbol {C}  = \boldsymbol{A}\boldsymbol{B}\), the derivative of the loss \( L \) w.r.t to matrix \(\boldsymbol {B} \) equals the transpose of matrix \(\boldsymbol {A} \) times the upstream derivative \(\frac{ {\partial L} }{ {\partial \boldsymbol {C} } }\). Let’s check the dimensions once more. On the left hand side of Equation (18), \(\frac{ {\partial L} }{ {\partial \boldsymbol {B} } }\) has a dimension of \(k \times n\), the same as \(\boldsymbol {B} \). On the right hand side, \({\boldsymbol {A} ^T}\) has a dimension of \(k \times m\) and \(\frac{ {\partial L} }{ {\partial \boldsymbol {C} } }\) has a dimension of \(m \times n\); therefore, their matrix product has a dimension of \(k \times n\) and matches that of \(\frac{ {\partial L} }{ {\partial \boldsymbol {B} } }\). </p>
 
 <p> Again, the above derivations can be generalized to any matrix multiplication. If you have time, you can derive it by yourself, just make sure the subscript indices are correct. </p>
 
 <h3><a name="_Custom_implementations_and_validation"></a>3. Custom implementations and validation  </h3>
-<p>With the derived Equations (13) and (17), it is in fact pretty easy to implement the backward pass of matrix multiplication. Please see <a href="https://github.com/coolgpu/Demo_Matrix_Multiplication_backward/blob/master/Demo_MatrixMultiplication_backward.py">the example implementation on GitHub</a> for a network that simply takes the mean of the matrix product \(\boldsymbol {C}  = \boldsymbol {A}  \boldsymbol {B} \) as the loss. The core part is just a 3-line code as demonstrated below.  </p>
+<p>With the derived Equations (13) and (18), it is in fact pretty easy to implement the backward pass of matrix multiplication. Please see <a href="https://github.com/coolgpu/Demo_Matrix_Multiplication_backward/blob/master/Demo_MatrixMultiplication_backward.py">the example implementation on GitHub</a> for a network that simply takes the mean of the matrix product \(\boldsymbol {C}  = \boldsymbol {A}  \boldsymbol {B} \) as the loss. The core part is just a 3-line code as demonstrated below.  </p>
 
 <pre class="pre-scrollable">
 	<code class="python">
 		
         grad_C_manual = (torch.ones(C.shape, dtype=torch.float64)/C.numel())
+
         grad_A_manual = grad_C_manual.mm(B.t())
+
         grad_B_manual = A.t().mm(grad_C_manual)
 
 	</code>
@@ -238,7 +240,7 @@ author: Xiyun Song
 
 <p>The first line calculate the derivative of the loss w.r.t \(\boldsymbol {C} \) for the mean operation, which serves as the upstream gradient for \(\frac{ {\partial L} }{ {\partial \boldsymbol {A} } }\) and \(\frac{ {\partial L} }{ {\partial \boldsymbol {B} } }\). </p>
 
-<p>The second and third lines compute \(\frac{ {\partial L} }{ {\partial \boldsymbol {A} } }\) and \(\frac{ {\partial L} }{ {\partial \boldsymbol {B} } }\) using the chain rule based on Equations (13) and (17), respectively. The function <b><i>t()</i></b> is a matrix transpose operation. </p>
+<p>The second and third lines compute \(\frac{ {\partial L} }{ {\partial \boldsymbol {A} } }\) and \(\frac{ {\partial L} }{ {\partial \boldsymbol {B} } }\) using the chain rule based on Equations (13) and (18), respectively. The function <b><i>t()</i></b> is a matrix transpose operation. </p>
 
 <p>To validate our derivations and implementation, we compared these results with those from Torch built-in implementation via <b><i>loss.backward()</i></b> and they matched.  </p>
 
