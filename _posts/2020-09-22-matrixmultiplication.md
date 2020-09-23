@@ -242,11 +242,8 @@ author: Xiyun Song
 
 <p>To validate our derivations and implementation, we compared these results with those from Torch built-in implementation via <b><i>loss.backward()</i></b> and they matched.  </p>
 
-
 <h3><a name="_Summary"></a>4. Summary </h3>
 <p>In this post, we demonstrated how to derive the gradients of matrix multiplication in neural networks. While the derivation steps seem complex, the final equations of the gradients are pretty simple and easy to implement:  </p>
-
-
 
 <div class="alert alert-secondary equation">
 	<span>\(\frac{ {\partial L} }{ {\partial \boldsymbol {A} } } = \frac{ {\partial L} }{ {\partial \boldsymbol {C} } }{\boldsymbol {B} ^T}\) and \(\frac{ {\partial L} }{ {\partial \boldsymbol {B} } } = {\boldsymbol {A} ^T}\frac{ {\partial L} }{ {\partial \boldsymbol {C} } }\)	</span><span class="ref-num"> </span>
