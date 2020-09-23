@@ -87,43 +87,43 @@ author: Xiyun Song
 <p>Let’s start with writing the matrix \(\boldsymbol {A} \), \(\boldsymbol {B} \) and their matrix product \(\boldsymbol {C}  = AB\) in expanded format.</p>
 
 <div class="alert alert-secondary equation">
-	<span>\(\boldsymbol {A}  = \left[ {\begin{array}{*{20}{c} }{ {a_{11} } }&{ {a_{12} } }&{ {a_{13} } }&{ {a_{14} } }\\{ {a_{21} } }&{ {a_{22} } }&{ {a_{23} } }&{ {a_{24} } }\end{array} } \right]\) and \(\boldsymbol {B}  = \left[ {\begin{array}{*{20}{c} }{ {b_{11} } }&{ {b_{12} } }&{ {b_{13} } }\\{ {b_{21} } }&{ {b_{22} } }&{ {b_{23} } }\\{ {b_{31} } }&{ {b_{32} } }&{ {b_{33} } }\\{ {b_{41} } }&{ {b_{42} } }&{ {b_{43} } }\end{array} } \right]\),	</span><span class="ref-num"> (7) </span>
+	<span>\(\boldsymbol {A}  = \left[ {\begin{array}{*{20}{c} }{ {a_{11} } }&{ {a_{12} } }&{ {a_{13} } }&{ {a_{14} } }\\{ {a_{21} } }&{ {a_{22} } }&{ { \color{red} a_{23 } } }&{ {a_{24} } }\end{array} } \right]\) and \(\boldsymbol {B}  = \left[ {\begin{array}{*{20}{c} }{ {b_{11} } }&{ {b_{12} } }&{ {b_{13} } }\\{ {b_{21} } }&{ {b_{22} } }&{ {b_{23} } }\\{ {b_{31} } }&{ {b_{32} } }&{ {b_{33} } }\\{ {b_{41} } }&{ {b_{42} } }&{ {b_{43} } }\end{array} } \right]\),	</span><span class="ref-num"> (7) </span>
 </div>
 
 
 <div class="alert alert-secondary equation">
 	<span>
-		<p><span> \(\boldsymbol {C}  = \left[ {\begin{array}{*{20}{c} }{ {c_{11} } }&{ {c_{12} } }&{ {c_{13} } }\\{ {c_{21} } }&{ {c_{22} } }&{ {c_{23} } }\end{array} } \right] = \left[ {\begin{array}{*{20}{c} }{ {a_{11} } }&{ {a_{12} } }&{ {a_{13} } }&{ {a_{14} } }\\{ {a_{21} } }&{ {a_{22} } }&{ {a_{23} } }&{ {a_{24} } }\end{array} } \right]\left[ {\begin{array}{*{20}{c} }{ {b_{11} } }&{ {b_{12} } }&{ {b_{13} } }\\{ {b_{21} } }&{ {b_{22} } }&{ {b_{23} } }\\{ {b_{31} } }&{ {b_{32} } }&{ {b_{33} } }\\{ {b_{41} } }&{ {b_{42} } }&{ {b_{43} } }\end{array} } \right]\)</span></p>
+		<p><span> \(\boldsymbol {C}  = \left[ {\begin{array}{*{20}{c} }{ {c_{11} } }&{ {c_{12} } }&{ {c_{13} } }\\{ {c_{21} } }&{ {c_{22} } }&{ {c_{23} } }\end{array} } \right] = \left[ {\begin{array}{*{20}{c} }{ {a_{11} } }&{ {a_{12} } }&{ {a_{13} } }&{ {a_{14} } }\\{ {a_{21} } }&{ {a_{22} } }&{ { \color{red} a_{23 } } }&{ {a_{24} } }\end{array} } \right]\left[ {\begin{array}{*{20}{c} }{ {b_{11} } }&{ {b_{12} } }&{ {b_{13} } }\\{ {b_{21} } }&{ {b_{22} } }&{ {b_{23} } }\\{ {b_{31} } }&{ {b_{32} } }&{ {b_{33} } }\\{ {b_{41} } }&{ {b_{42} } }&{ {b_{43} } }\end{array} } \right]\)</span></p>
 
-		<p><span> \(= \left[ {\begin{array}{*{20}{c} }{ { {a_{11} }{b_{11} } + {a_{12} }{b_{21} } + {a_{13} }{b_{31} } + {a_{14} }{b_{41} } } }&{ { {a_{11} }{b_{12} } + {a_{12} }{b_{22} } + {a_{13} }{b_{32} } + {a_{14} }{b_{42} } } }&{ { {a_{11} }{b_{13} } + {a_{12} }{b_{23} } + {a_{13} }{b_{33} } + {a_{14} }{b_{43} } } }\\{ { {a_{21} }{b_{11} } + {a_{22} }{b_{21} } + {a_{23} }{b_{31} } + {a_{24} }{b_{41} } } }&{ { {a_{21} }{b_{12} } + {a_{22} }{b_{22} } + {a_{23} }{b_{32} } + {a_{24} }{b_{42} } } }&{ { {a_{21} }{b_{13} } + {a_{22} }{b_{23} } + {a_{23} }{b_{33} } + {a_{24} }{b_{43} } } }\end{array} } \right] \) </span></p>	
+		<p><span> \(= \left[ {\begin{array}{*{20}{c} }{ { {a_{11} }{b_{11} } + {a_{12} }{b_{21} } + {a_{13} }{b_{31} } + {a_{14} }{b_{41} } } }&{ { {a_{11} }{b_{12} } + {a_{12} }{b_{22} } + {a_{13} }{b_{32} } + {a_{14} }{b_{42} } } }&{ { {a_{11} }{b_{13} } + {a_{12} }{b_{23} } + {a_{13} }{b_{33} } + {a_{14} }{b_{43} } } }\\{ { {a_{21} }{b_{11} } + {a_{22} }{b_{21} } + { \color{red} a_{23 } }{b_{31} } + {a_{24} }{b_{41} } } }&{ { {a_{21} }{b_{12} } + {a_{22} }{b_{22} } + { \color{red} a_{23 } }{b_{32} } + {a_{24} }{b_{42} } } }&{ { {a_{21} }{b_{13} } + {a_{22} }{b_{23} } + { \color{red} a_{23 } }{b_{33} } + {a_{24} }{b_{43} } } }\end{array} } \right] \) </span></p>	
 	</span>
 	<span class="ref-num">(8)</span>
 </div>
 
-<p> Consider an arbitrary element of \(\boldsymbol {A} \), for example \({a_{23} }\), we have the local partial derivative of \(\boldsymbol {C} \)  w.r.t. \({a_{23} }\) based on Equation (8). </p>
+<p> Consider an arbitrary element of \(\boldsymbol {A} \), for example \({ \color{red} a_{23 } }\), we have the local partial derivative of \(\boldsymbol {C} \)  w.r.t. \({ \color{red} a_{23 } }\) based on Equation (8). </p>
 
 <div class="alert alert-secondary equation">
 	<span>
-		<p><span> \(\frac{ {\partial {c_{11} } } }{ {\partial {a_{23} } } } = 0\)	</span></p>
+		<p><span> \(\frac{ {\partial {c_{11} } } }{ {\partial { \color{red} a_{23 } } } } = 0\)	</span></p>
 
-		<p><span> \(\frac{ {\partial {c_{12} } } }{ {\partial {a_{23} } } } = 0\) </span></p>
+		<p><span> \(\frac{ {\partial {c_{12} } } }{ {\partial { \color{red} a_{23 } } } } = 0\) </span></p>
 
-		<p><span> \(\frac{ {\partial {c_{13} } } }{ {\partial {a_{23} } } } = 0\) </span></p>
+		<p><span> \(\frac{ {\partial {c_{13} } } }{ {\partial { \color{red} a_{23 } } } } = 0\) </span></p>
 
-		<p><span> \(\frac{ {\partial {c_{21} } } }{ {\partial {a_{23} } } } = \frac{\partial }{ {\partial {a_{23} } } }\left( { {a_{21} }{b_{11} } + {a_{22} }{b_{21} } + {a_{23} }{b_{31} } + {a_{24} }{b_{41} } } \right) = 0 + 0 + \frac{\partial }{ {\partial {a_{23} } } }\left( { {a_{23} }{b_{31} } } \right) + 0 = {b_{31} }\)</span></p>
+		<p><span> \(\frac{ {\partial {c_{21} } } }{ {\partial { \color{red} a_{23 } } } } = \frac{\partial }{ {\partial { \color{red} a_{23 } } } }\left( { {a_{21} }{b_{11} } + {a_{22} }{b_{21} } + { \color{red} a_{23 } }{b_{31} } + {a_{24} }{b_{41} } } \right) = 0 + 0 + \frac{\partial }{ {\partial { \color{red} a_{23 } } } }\left( { { \color{red} a_{23 } }{b_{31} } } \right) + 0 = {b_{31} }\)</span></p>
 
-        <p><span> \(\frac{ {\partial {c_{22} } } }{ {\partial {a_{23} } } } = \frac{\partial }{ {\partial {a_{23} } } }\left( { {a_{21} }{b_{12} } + {a_{22} }{b_{22} } + {a_{23} }{b_{32} } + {a_{24} }{b_{42} } } \right) = 0 + 0 + \frac{\partial }{ {\partial {a_{23} } } }\left( { {a_{23} }{b_{32} } } \right) + 0 = {b_{32} }\) </span></p>
+        <p><span> \(\frac{ {\partial {c_{22} } } }{ {\partial { \color{red} a_{23 } } } } = \frac{\partial }{ {\partial { \color{red} a_{23 } } } }\left( { {a_{21} }{b_{12} } + {a_{22} }{b_{22} } + { \color{red} a_{23 } }{b_{32} } + {a_{24} }{b_{42} } } \right) = 0 + 0 + \frac{\partial }{ {\partial { \color{red} a_{23 } } } }\left( { { \color{red} a_{23 } }{b_{32} } } \right) + 0 = {b_{32} }\) </span></p>
 
-        <p><span> \(\frac{ {\partial {c_{23} } } }{ {\partial {a_{23} } } } = \frac{\partial }{ {\partial {a_{23} } } }\left( { {a_{21} }{b_{13} } + {a_{22} }{b_{23} } + {a_{23} }{b_{33} } + {a_{24} }{b_{43} } } \right) = 0 + 0 + \frac{\partial }{ {\partial {a_{23} } } }\left( { {a_{23} }{b_{33} } } \right) + 0 = {b_{33} }\) </span></p>
+        <p><span> \(\frac{ {\partial {c_{23} } } }{ {\partial { \color{red} a_{23 } } } } = \frac{\partial }{ {\partial { \color{red} a_{23 } } } }\left( { {a_{21} }{b_{13} } + {a_{22} }{b_{23} } + { \color{red} a_{23 } }{b_{33} } + {a_{24} }{b_{43} } } \right) = 0 + 0 + \frac{\partial }{ {\partial { \color{red} a_{23 } } } }\left( { { \color{red} a_{23 } }{b_{33} } } \right) + 0 = {b_{33} }\) </span></p>
 	</span>
 	<span class="ref-num">(9)</span>
 </div>
 
-<p> Using the chain rule, we have the partial derivative of the loss \(L\) w.r.t. \({a_{23}}\) </p>
+<p> Using the chain rule, we have the partial derivative of the loss \(L\) w.r.t. \({ \color{red} a_{23 }}\) </p>
 
 <div class="alert alert-secondary equation">
 	<span>
-		<p><span> \( \frac{ {\partial L} }{ {\partial {a_{23} } } } = \frac{ {\partial L} }{ {\partial {c_{11} } } }\frac{ {\partial {c_{11} } } }{ {\partial {a_{23} } } } + \frac{ {\partial L} }{ {\partial {c_{12} } } }\frac{ {\partial {c_{12} } } }{ {\partial {a_{23} } } } + \frac{ {\partial L} }{ {\partial {c_{13} } } }\frac{ {\partial {c_{13} } } }{ {\partial {a_{23} } } } + \frac{ {\partial L} }{ {\partial {c_{21} } } }\frac{ {\partial {c_{21} } } }{ {\partial {a_{23} } } } + \frac{ {\partial L} }{ {\partial {c_{22} } } }\frac{ {\partial {c_{22} } } }{ {\partial {a_{23} } } } + \frac{ {\partial L} }{ {\partial {c_{23} } } }\frac{ {\partial {c_{23} } } }{ {\partial {a_{23} } } }\)	</span></p>
+		<p><span> \( \frac{ {\partial L} }{ {\partial { \color{red} a_{23 } } } } = \frac{ {\partial L} }{ {\partial {c_{11} } } }\frac{ {\partial {c_{11} } } }{ {\partial { \color{red} a_{23 } } } } + \frac{ {\partial L} }{ {\partial {c_{12} } } }\frac{ {\partial {c_{12} } } }{ {\partial { \color{red} a_{23 } } } } + \frac{ {\partial L} }{ {\partial {c_{13} } } }\frac{ {\partial {c_{13} } } }{ {\partial { \color{red} a_{23 } } } } + \frac{ {\partial L} }{ {\partial {c_{21} } } }\frac{ {\partial {c_{21} } } }{ {\partial { \color{red} a_{23 } } } } + \frac{ {\partial L} }{ {\partial {c_{22} } } }\frac{ {\partial {c_{22} } } }{ {\partial { \color{red} a_{23 } } } } + \frac{ {\partial L} }{ {\partial {c_{23} } } }\frac{ {\partial {c_{23} } } }{ {\partial { \color{red} a_{23 } } } }\)	</span></p>
 
         <p><span>\( = 0 + 0 + 0 + \frac{ {\partial L} }{ {\partial {c_{21} } } }{b_{31} } + \frac{ {\partial L} }{ {\partial {c_{22} } } }{b_{32} } + \frac{ {\partial L} }{ {\partial {c_{23} } } }{b_{33} }\)</span></p>
 
@@ -139,7 +139,7 @@ author: Xiyun Song
 
 <div class="alert alert-secondary equation">
 	<span>
-		<p><span> \(\frac{ {\partial L} }{ {\partial \boldsymbol {A} } } = \left[ {\begin{array}{*{20}{c} }{\frac{ {\partial L} }{ {\partial {a_{11} }} }}&{\frac{ {\partial L} }{ {\partial {a_{12} }} }}&{\frac{ {\partial L} }{ {\partial {a_{13} }} }}&{\frac{ {\partial L} }{ {\partial {a_{14} }} }}\\{\frac{ {\partial L} }{ {\partial {a_{21} }} }}&{\frac{ {\partial L} }{ {\partial {a_{22} }} }}&{\frac{ {\partial L} }{ {\partial {a_{23} }} }}&{\frac{ {\partial L} }{ {\partial {a_{24} }} }}\end{array} } \right]\)	</span></p>
+		<p><span> \(\frac{ {\partial L} }{ {\partial \boldsymbol {A} } } = \left[ {\begin{array}{*{20}{c} }{\frac{ {\partial L} }{ {\partial {a_{11} } } } }&{\frac{ {\partial L} }{ {\partial {a_{12} } } } }&{\frac{ {\partial L} }{ {\partial {a_{13} } } } }&{\frac{ {\partial L} }{ {\partial {a_{14} } } } }\\{\frac{ {\partial L} }{ {\partial {a_{21} } } } }&{\frac{ {\partial L} }{ {\partial {a_{22} } } } }&{\frac{ {\partial L} }{ {\partial {a_{23} } } } }&{\frac{ {\partial L} }{ {\partial {a_{24} } } } }\end{array} } \right]\)	</span></p>
 
         <p><span> \( = \left[ {\begin{array}{*{20}{c} }{ {\frac{ {\partial L} }{ {\partial {c_{11} } } }{b_{11} } + \frac{ {\partial L} }{ {\partial {c_{12} } } }{b_{12} } + \frac{ {\partial L} }{ {\partial {c_{13} } } }{b_{13} } } }&{ { \frac{ {\partial L} }{ {\partial {c_{11} } } }{b_{21} } + \frac{ {\partial L} }{ {\partial {c_{12} } } }{b_{22} } + \frac{ {\partial L} }{ {\partial {c_{13} } } }{b_{23} } } }&{ { \frac{ {\partial L} }{ {\partial {c_{11} } } }{b_{31} } + \frac{ {\partial L} }{ {\partial {c_{12} } } }{b_{32} } + \frac{ {\partial L} }{ {\partial {c_{13} } } }{b_{33} } } }&{ { \frac{ {\partial L} }{ {\partial {c_{11} } } }{b_{41} } + \frac{ {\partial L} }{ {\partial {c_{12} } } }{b_{42} } + \frac{ {\partial L} }{ {\partial {c_{13} } } }{b_{43} } } }\\{ { \frac{ {\partial L} }{ {\partial {c_{21} } } }{b_{11} } + \frac{ {\partial L} }{ {\partial {c_{22} } } }{b_{12} } + \frac{ {\partial L} }{ {\partial {c_{23} } } }{b_{13} } } }&{ { \frac{ {\partial L} }{ {\partial {c_{21} } } }{b_{21} } + \frac{ {\partial L} }{ {\partial {c_{22} } } }{b_{22} } + \frac{ {\partial L} }{ {\partial {c_{23} } } }{b_{23} } } }&{ { \frac{ {\partial L} }{ {\partial {c_{21} } } }{b_{31} } + \frac{ {\partial L} }{ {\partial {c_{22} } } }{b_{32} } + \frac{ {\partial L} }{ {\partial {c_{23} } } }{b_{33} } } }&{ { \frac{ {\partial L} }{ {\partial {c_{21} } } }{b_{41} } + \frac{ {\partial L} }{ {\partial {c_{22} } } }{b_{42} } + \frac{ {\partial L} }{ {\partial {c_{23} } } }{b_{43} } } }\end{array} } \right]\)  </span></p>
 		
@@ -163,30 +163,30 @@ author: Xiyun Song
 
 
 <h4>2.4 Derivation of the gradient \(\frac{ {\partial L} }{ {\partial  \boldsymbol {\boldsymbol {B} } } }\)  </h4> 
-<p>Similarly, for \(\frac{ {\partial L} }{ {\partial \boldsymbol {B} } }\), let’s consider an arbitrary element of \(\boldsymbol {B} \), for example \({b_{12} }\), we have the local partial derivative of \(\boldsymbol {C} \)  w.r.t. \({b_{12} }\) based on Equation (8) above. </p>
+<p>Similarly, for \(\frac{ {\partial L} }{ {\partial \boldsymbol {B} } }\), let’s consider an arbitrary element of \(\boldsymbol {B} \), for example \({ \color{blue} b_{12} }\), we have the local partial derivative of \(\boldsymbol {C} \)  w.r.t. \({ \color{blue} b_{12} }\) based on Equation (8) above. </p>
 
 <div class="alert alert-secondary equation">
 	<span>
-		<p><span> \(\frac{ {\partial {c_{11} } } }{ {\partial {b_{12} } } } = 0\)	</span></p>
+		<p><span> \(\frac{ {\partial {c_{11} } } }{ {\partial { \color{blue} b_{12} } } } = 0\)	</span></p>
 
-		<p><span> \(\frac{ {\partial {c_{12} } } }{ {\partial {b_{12} } } } = \frac{\partial }{ {\partial {b_{12} } } }\left( { {a_{11} }{b_{12} } + {a_{12} }{b_{22} } + {a_{13} }{b_{32} } + {a_{14} }{b_{42} } } \right) = {a_{11} }\) </span></p>
+		<p><span> \(\frac{ {\partial {c_{12} } } }{ {\partial { \color{blue} b_{12} } } } = \frac{\partial }{ {\partial { \color{blue} b_{12} } } }\left( { {a_{11} }{ \color{blue} b_{12} } + {a_{12} }{b_{22} } + {a_{13} }{b_{32} } + {a_{14} }{b_{42} } } \right) = {a_{11} }\) </span></p>
 
-		<p><span> \(\frac{ {\partial {c_{13} } } }{ {\partial {b_{12} } } } = 0\) </span></p>
+		<p><span> \(\frac{ {\partial {c_{13} } } }{ {\partial { \color{blue} b_{12} } } } = 0\) </span></p>
 
-		<p><span> \(\frac{ {\partial {c_{21} } } }{ {\partial {b_{12} } } } = 0\) </span></p>
+		<p><span> \(\frac{ {\partial {c_{21} } } }{ {\partial { \color{blue} b_{12} } } } = 0\) </span></p>
 
-        <p><span> \(\frac{ {\partial {c_{22} } } }{ {\partial {b_{12} } } } = \frac{\partial }{ {\partial {b_{12} } } }\left( { {a_{21} }{b_{12} } + {a_{22} }{b_{22} } + {a_{23} }{b_{32} } + {a_{24} }{b_{42} } } \right) = {a_{21} }\) </span></p>
+        <p><span> \(\frac{ {\partial {c_{22} } } }{ {\partial { \color{blue} b_{12} } } } = \frac{\partial }{ {\partial { \color{blue} b_{12} } } }\left( { {a_{21} }{ \color{blue} b_{12} } + {a_{22} }{b_{22} } + {a_{23} }{b_{32} } + {a_{24} }{b_{42} } } \right) = {a_{21} }\) </span></p>
 
-        <p><span> \(\frac{ {\partial {c_{23} } } }{ {\partial {b_{12} } } } = 0\) </span></p>
+        <p><span> \(\frac{ {\partial {c_{23} } } }{ {\partial { \color{blue} b_{12} } } } = 0\) </span></p>
 	</span>
 	<span class="ref-num">(14)</span>
 </div>
 
-<p> Using the chain rule, we have the partial derivative of the loss \(L\) w.r.t. \({b_{12} }\) </p>
+<p> Using the chain rule, we have the partial derivative of the loss \(L\) w.r.t. \({ \color{blue} b_{12} }\) </p>
 
 <div class="alert alert-secondary equation">
 	<span>
-		<p><span> \( \frac{ {\partial L} }{ {\partial {b_{12} } } } = \frac{ {\partial L} }{ {\partial {c_{11} } } }\frac{ {\partial {c_{11} } } }{ {\partial {b_{12} } } } + \frac{ {\partial L} }{ {\partial {c_{12} } } }\frac{ {\partial {c_{12} } } }{ {\partial {b_{12} } } } + \frac{ {\partial L} }{ {\partial {c_{13} } } }\frac{ {\partial {c_{13} } } }{ {\partial {b_{12} } } } + \frac{ {\partial L} }{ {\partial {c_{21} } } }\frac{ {\partial {c_{21} } } }{ {\partial {b_{12} } } } + \frac{ {\partial L} }{ {\partial {c_{22} } } }\frac{ {\partial {c_{22} } } }{ {\partial {b_{12} } } } + \frac{ {\partial L} }{ {\partial {c_{23} } } }\frac{ {\partial {c_{23} } } }{ {\partial {b_{12} } } }\)	</span></p>
+		<p><span> \( \frac{ {\partial L} }{ {\partial { \color{blue} b_{12} } } } = \frac{ {\partial L} }{ {\partial {c_{11} } } }\frac{ {\partial {c_{11} } } }{ {\partial { \color{blue} b_{12} } } } + \frac{ {\partial L} }{ {\partial {c_{12} } } }\frac{ {\partial {c_{12} } } }{ {\partial { \color{blue} b_{12} } } } + \frac{ {\partial L} }{ {\partial {c_{13} } } }\frac{ {\partial {c_{13} } } }{ {\partial { \color{blue} b_{12} } } } + \frac{ {\partial L} }{ {\partial {c_{21} } } }\frac{ {\partial {c_{21} } } }{ {\partial { \color{blue} b_{12} } } } + \frac{ {\partial L} }{ {\partial {c_{22} } } }\frac{ {\partial {c_{22} } } }{ {\partial { \color{blue} b_{12} } } } + \frac{ {\partial L} }{ {\partial {c_{23} } } }\frac{ {\partial {c_{23} } } }{ {\partial { \color{blue} b_{12} } } }\)	</span></p>
 
         <p><span> \( =0 + \frac{ {\partial L} }{ {\partial {c_{12} } } }{a_{11} } + 0 + 0 + \frac{ {\partial L} }{ {\partial {c_{22} } } }{a_{21} } + 0 \) </span></p>
 
@@ -212,7 +212,7 @@ author: Xiyun Song
 <p>This can be rewritten as a matrix product.</p>
 
 <div class="alert alert-secondary equation">
-	<span>\(\frac{ {\partial L} }{ {\partial \boldsymbol {B} } } = \left[ {\begin{array}{*{20}{c} }{ {a_{11} } }&{ {a_{21} } }\\{ {a_{12} } }&{ {a_{22} } }\\{ {a_{13} } }&{ {a_{23} } }\\{ {a_{14} } }&{ {a_{24} } }\end{array} } \right]\left[ {\begin{array}{*{20}{c} }{\frac{ {\partial L} }{ {\partial {c_{11} } } } }&{\frac{ {\partial L} }{ {\partial {c_{12} } } } }&{\frac{ {\partial L} }{ {\partial {c_{13} } } } }\\{\frac{ {\partial L} }{ {\partial {c_{21} } } } }&{\frac{ {\partial L} }{ {\partial {c_{22} } } } }&{\frac{ {\partial L} }{ {\partial {c_{23} } } } }\end{array} } \right]\)</span><span class="ref-num">(17)</span>
+	<span>\(\frac{ {\partial L} }{ {\partial \boldsymbol {B} } } = \left[ {\begin{array}{*{20}{c} }{ {a_{11} } }&{ {a_{21} } }\\{ {a_{12} } }&{ {a_{22} } }\\{ {a_{13} } }&{ { a_{23 } } }\\{ {a_{14} } }&{ {a_{24} } }\end{array} } \right]\left[ {\begin{array}{*{20}{c} }{\frac{ {\partial L} }{ {\partial {c_{11} } } } }&{\frac{ {\partial L} }{ {\partial {c_{12} } } } }&{\frac{ {\partial L} }{ {\partial {c_{13} } } } }\\{\frac{ {\partial L} }{ {\partial {c_{21} } } } }&{\frac{ {\partial L} }{ {\partial {c_{22} } } } }&{\frac{ {\partial L} }{ {\partial {c_{23} } } } }\end{array} } \right]\)</span><span class="ref-num">(17)</span>
 </div>
 
 <p> In fact, the first matrix is the transpose of \(\boldsymbol {A} \) and the second matrix is the upstream derivative \(\frac{ {\partial L} }{ {\partial \boldsymbol {C} } }\). Then we have  </p>
@@ -240,7 +240,7 @@ author: Xiyun Song
 	</code>
 </pre>
 
-<p>The first line calculate the derivative of the loss w.r.t \(\boldsymbol {C} \) for the mean operation, which serves as the upstream gradient for \(\frac{ {\partial L} }{ {\partial \boldsymbol {A} } }\) and \(\frac{ {\partial L} }{ {\partial \boldsymbol {B} } }\). </p>
+<p>The first line calculate the derivative of the loss w.r.t \(\boldsymbol {C} \) for the mean operation in Equation (4), which serves as the upstream gradient for \(\frac{ {\partial L} }{ {\partial \boldsymbol {A} } }\) and \(\frac{ {\partial L} }{ {\partial \boldsymbol {B} } }\). </p>
 
 <p>The second and third lines compute \(\frac{ {\partial L} }{ {\partial \boldsymbol {A} } }\) and \(\frac{ {\partial L} }{ {\partial \boldsymbol {B} } }\) using the chain rule based on Equations (13) and (18), respectively. The function <b><i>t()</i></b> is a matrix transpose operation. </p>
 
