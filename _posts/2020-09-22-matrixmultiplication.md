@@ -135,7 +135,7 @@ author: Xiyun Song
 </div>
 
 
-<p> Following a similar manner, we can derive the other elements of \(\frac{ {\partial L} }{ {\partial \boldsymbol {A} } }\) as below </p>
+<p> The second line in Equation (10) used the results from Equation (9). Following a similar manner, we can derive the other elements of \(\frac{ {\partial L} }{ {\partial \boldsymbol {A} } }\) as below </p>
 
 <div class="alert alert-secondary equation">
 	<span>
@@ -159,7 +159,7 @@ author: Xiyun Song
 	<span>\(\frac{ {\partial L} }{ {\partial \boldsymbol {A} } } = \frac{ {\partial L} }{ {\partial \boldsymbol {C} } }{\boldsymbol {B} ^T}\)</span><span class="ref-num">(13)</span>
 </div>
 
-<p> Equation (13) shows that, for \(\boldsymbol {C}  = \boldsymbol{A}\boldsymbol{B}\), the derivative of the loss \( L \) w.r.t to matrix \(\boldsymbol {A} \) equals the upstream derivative \(\frac{ {\partial L} }{ {\partial \boldsymbol {C} } }\) times the transpose of matrix \(\boldsymbol {B} \). Let’s check the dimensions. On the left hand side of Equation (13), \(\frac{ {\partial L} }{ {\partial \boldsymbol {A} } }\) has a dimension of \(m \times k\). On the right hand side,  \(\frac{ {\partial L} }{ {\partial \boldsymbol {C} } }\) has a dimension of \(m \times n\) and \({\boldsymbol {B} ^T}\) has a dimension of \(n \times k\); thereforef their matrix product has a dimension of \(m \times k\) and matches that of \(\frac{ {\partial L} }{ {\partial \boldsymbol {A} } }\). </p>
+<p> Equation (13) shows that, for a matrix multiplication \(\boldsymbol {C}  = \boldsymbol{A}\boldsymbol{B}\) in a neural network, the derivative of the loss \( L \) w.r.t matrix \(\boldsymbol {A} \) equals the upstream derivative \(\frac{ {\partial L} }{ {\partial \boldsymbol {C} } }\) times the transpose of matrix \(\boldsymbol {B} \). Let’s check the dimensions. On the left hand side of Equation (13), \(\frac{ {\partial L} }{ {\partial \boldsymbol {A} } }\) has a dimension of \(m \times k\), the same as \( \boldsymbol {A} \). On the right hand side,  \(\frac{ {\partial L} }{ {\partial \boldsymbol {C} } }\) has a dimension of \(m \times n\) and \({\boldsymbol {B} ^T}\) has a dimension of \(n \times k\); therefore, their matrix product has a dimension of \(m \times k\) and matches that of \(\frac{ {\partial L} }{ {\partial \boldsymbol {A} } }\). </p>
 
 
 <h4>2.4 Derivation of the gradient \(\frac{ {\partial L} }{ {\partial  \boldsymbol {\boldsymbol {B} } } }\)  </h4> 
@@ -186,16 +186,18 @@ author: Xiyun Song
 
 <div class="alert alert-secondary equation">
 	<span>
-		<p><span> \( \frac{ {\partial L} }{ {\partial {b_{12} } } } == \frac{ {\partial L} }{ {\partial {c_{11} } } }\frac{ {\partial {c_{11} } } }{ {\partial {b_{12} } } } + \frac{ {\partial L} }{ {\partial {c_{12} } } }\frac{ {\partial {c_{12} } } }{ {\partial {b_{12} } } } + \frac{ {\partial L} }{ {\partial {c_{13} } } }\frac{ {\partial {c_{13} } } }{ {\partial {b_{12} } } } + \frac{ {\partial L} }{ {\partial {c_{21} } } }\frac{ {\partial {c_{21} } } }{ {\partial {b_{12} } } } + \frac{ {\partial L} }{ {\partial {c_{22} } } }\frac{ {\partial {c_{22} } } }{ {\partial {b_{12} } } } + \frac{ {\partial L} }{ {\partial {c_{23} } } }\frac{ {\partial {c_{23} } } }{ {\partial {b_{12} } } }\)	</span></p>
+		<p><span> \( \frac{ {\partial L} }{ {\partial {b_{12} } } } = \frac{ {\partial L} }{ {\partial {c_{11} } } }\frac{ {\partial {c_{11} } } }{ {\partial {b_{12} } } } + \frac{ {\partial L} }{ {\partial {c_{12} } } }\frac{ {\partial {c_{12} } } }{ {\partial {b_{12} } } } + \frac{ {\partial L} }{ {\partial {c_{13} } } }\frac{ {\partial {c_{13} } } }{ {\partial {b_{12} } } } + \frac{ {\partial L} }{ {\partial {c_{21} } } }\frac{ {\partial {c_{21} } } }{ {\partial {b_{12} } } } + \frac{ {\partial L} }{ {\partial {c_{22} } } }\frac{ {\partial {c_{22} } } }{ {\partial {b_{12} } } } + \frac{ {\partial L} }{ {\partial {c_{23} } } }\frac{ {\partial {c_{23} } } }{ {\partial {b_{12} } } }\)	</span></p>
 
-        <p><span> \( = {a_{11} }\frac{ {\partial L} }{ {\partial {c_{12} } } } + {a_{21} }\frac{ {\partial L} }{ {\partial {c_{22} } } }\) </span></p>
+        <p><span> \( =0 + \frac{ {\partial L} }{ {\partial {c_{12} } } }{a_{11} } + 0 + 0 + \frac{ {\partial L} }{ {\partial {c_{22} } } }{a_{21} } + 0 \) </span></p>
+
+		<p><span> \( = {a_{11} }\frac{ {\partial L} }{ {\partial {c_{12} } } } + {a_{21} }\frac{ {\partial L} }{ {\partial {c_{22} } } }\) </span></p>
 
 		
 	</span>
 	<span class="ref-num">(15)</span>
 </div>
 
-<p> Following a similar manner again, we can derive the other elements of \(\frac{ {\partial L} }{ {\partial \boldsymbol {B} } }\) as shown below </p>
+<p> The second line in Equation (15) used the results from Equation (14). Following a similar manner again, we can derive the other elements of \(\frac{ {\partial L} }{ {\partial \boldsymbol {B} } }\) as shown below </p>
 
 <div class="alert alert-secondary equation">
 	<span>
@@ -219,7 +221,7 @@ author: Xiyun Song
 	<span> \(\frac{ {\partial L} }{ {\partial \boldsymbol {B} } } = {\boldsymbol {A} ^T}\frac{ {\partial L} }{ {\partial \boldsymbol {C} } }\) </span><span class="ref-num">(18)</span>
 </div>
 
-<p> Equation (18) shows that, for \(\boldsymbol {C}  = \boldsymbol{A}\boldsymbol{B}\), the derivative of the loss \( L \) w.r.t to matrix \(\boldsymbol {B} \) equals the transpose of matrix \(\boldsymbol {A} \) times the upstream derivative \(\frac{ {\partial L} }{ {\partial \boldsymbol {C} } }\). Let’s check the dimensions once more. On the left hand side of Equation (18), \(\frac{ {\partial L} }{ {\partial \boldsymbol {B} } }\) has a dimension of \(k \times n\), the same as \(\boldsymbol {B} \). On the right hand side, \({\boldsymbol {A} ^T}\) has a dimension of \(k \times m\) and \(\frac{ {\partial L} }{ {\partial \boldsymbol {C} } }\) has a dimension of \(m \times n\); therefore, their matrix product has a dimension of \(k \times n\) and matches that of \(\frac{ {\partial L} }{ {\partial \boldsymbol {B} } }\). </p>
+<p> Equation (18) shows that, for a matrix multiplication \(\boldsymbol {C}  = \boldsymbol{A}\boldsymbol{B}\) in a neural network, the derivative of the loss \( L \) w.r.t matrix \(\boldsymbol {B} \) equals the transpose of matrix \(\boldsymbol {A} \) times the upstream derivative \(\frac{ {\partial L} }{ {\partial \boldsymbol {C} } }\). Let’s check the dimensions once more. On the left hand side of Equation (18), \(\frac{ {\partial L} }{ {\partial \boldsymbol {B} } }\) has a dimension of \(k \times n\), the same as \(\boldsymbol {B} \). On the right hand side, \({\boldsymbol {A} ^T}\) has a dimension of \(k \times m\) and \(\frac{ {\partial L} }{ {\partial \boldsymbol {C} } }\) has a dimension of \(m \times n\); therefore, their matrix product has a dimension of \(k \times n\) and matches that of \(\frac{ {\partial L} }{ {\partial \boldsymbol {B} } }\). </p>
 
 <p> Again, the above derivations can be generalized to any matrix multiplication. If you have time, you can derive it by yourself, just make sure the subscript indices are correct. </p>
 
@@ -248,8 +250,17 @@ author: Xiyun Song
 <p>In this post, we demonstrated how to derive the gradients of matrix multiplication in neural networks. While the derivation steps seem complex, the final equations of the gradients are pretty simple and easy to implement:  </p>
 
 <div class="alert alert-secondary equation">
-	<span>\(\frac{ {\partial L} }{ {\partial \boldsymbol {A} } } = \frac{ {\partial L} }{ {\partial \boldsymbol {C} } }{\boldsymbol {B} ^T}\) and \(\frac{ {\partial L} }{ {\partial \boldsymbol {B} } } = {\boldsymbol {A} ^T}\frac{ {\partial L} }{ {\partial \boldsymbol {C} } }\)	</span><span class="ref-num"> </span>
+	<span>
+		<p><span style="color:darkblue"> \(\frac{ {\partial L} }{ {\partial \boldsymbol {A} } } = \frac{ {\partial L} }{ {\partial \boldsymbol {C} } }{\boldsymbol {B} ^T}\)	</span></p>
+
+        <p><span style="color:darkblue"> \(\frac{ {\partial L} }{ {\partial \boldsymbol {B} } } = {\boldsymbol {A} ^T}\frac{ {\partial L} }{ {\partial \boldsymbol {C} } }\)  </span></p>
+		
+	</span>
+	
 </div>
+
+<p> In real neural networks applications, the matrix \( \boldsymbol {A} \) and \( \boldsymbol {B} \) typically come from the outputs of other layers. In those scenarios, the gradients \(\frac{ {\partial L} }{ {\partial \boldsymbol {A} } } \) and \(\frac{ {\partial L} }{ {\partial \boldsymbol {B} } } \) can serve as the upsteam gradients of those layers in backpropagation computing.</p>
+
 
 <p> With matrix multiplication covered, we will move to Convolution in the next post. Please stay tuned. </p>
 
