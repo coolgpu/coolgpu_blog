@@ -14,5 +14,5 @@ author: Xiyun Song
   <li>Some tricks to solve the conflict between MathJax and Jekyll using kramdown for markdown. </li>
   <li>Comment section embed for websites. </li>
 </ul> 
-<p>Site up and running, cheers! </p>
+<p>Site is up and running, cheers! </p>
 
