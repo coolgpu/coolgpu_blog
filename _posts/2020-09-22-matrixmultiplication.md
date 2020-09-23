@@ -7,7 +7,7 @@ categories: github pages
 author: Xiyun Song
 ---
 
-<p>Convolution is the most widely used and important layer in deep learning neural networks for image classification or regression tasks. Its counterpart, transpose convolution or typically named as ConvTranspose, is also widely used in networks (e.g. UNet) to convert data back to the original image size so that they can be added to or concatenated with the original data to form skip layers. Due to the complexity involved in the forward and backward computation, both convolution and ConvTranspose do not seem as straightforward as other modules. Therefore, we plan to use the following 4 posts to explain the fundamentals of convolution and ConvTranspose with examples of custom implementations and hope to help clarify these concepts. </p>
+<p>Convolution is the most widely used and important layer in deep learning neural networks for image classification or regression tasks. Its counterpart, transpose convolution or typically named as ConvTranspose, is also widely used in networks (e.g. U-Net<sup>[<a href="#_Reference1">1</a>]</sup>, ResNet<sup>[<a href="#_Reference2">2</a>]</sup>) that requires re-sampling data back to the original image size so that they can be added to or concatenated with the original data to form skip layers. Due to the complexity involved in the forward and backward computation, both convolution and ConvTranspose do not seem as straightforward as other modules. Therefore, we plan to use the following 4 posts to explain the fundamentals of convolution and ConvTranspose with examples of custom implementations and hope to help clarify these concepts. </p>
 
 <ul>
 	<li><a href="">Matrix multiplication and its custom implementation (this post)</a></li>
@@ -253,6 +253,12 @@ author: Xiyun Song
 </div>
 
 <p> With matrix multiplication covered, we will move to Convolution in the next post. Please stay tuned. </p>
+
+<h3><a name="_References"></a>5. References</h3> 
+<ul>
+	<li><a name="_Reference1"></a>[1] Olaf Ronneberger, Philipp Fischer, Thomas Brox (2015). <a href="https://arxiv.org/abs/1505.04597">U-Net: Convolutional Networks for Biomedical Image Segmentation.</a></li>
+	<li><a name="_Reference2"></a>[2] Kaiming He, Xiangyu Zhang, Shaoqing Ren, Jian Sun (2015). <a href="https://arxiv.org/abs/1512.03385">Deep Residual Learning for Image Recognition.</a></li>	
+</ul>
 
 <br>
 
