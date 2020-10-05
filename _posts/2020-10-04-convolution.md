@@ -12,8 +12,8 @@ author: Xiyun Song
 
 <ul>
 	<li><a href="https://coolgpu.github.io/coolgpu_blog/github/pages/2020/09/22/matrixmultiplication.html">Matrix multiplication and its custom implementation</a></li>
-	<li><a href="">Conv2d and its custom implementation (this post)</a></li>
-	<li>ConvTranpose2d and its custom implementation </li>
+	<li><a href="">Conv2d and its gradients (this post)</a></li>
+	<li>ConvTranpose2d and its gradients </li>
 	<li>Application of Conv2d and ConvTranpose2d in Neural Networks</li>
 </ul>
 
