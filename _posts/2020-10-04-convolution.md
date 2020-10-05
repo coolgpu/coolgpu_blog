@@ -197,7 +197,7 @@ author: Xiyun Song
 <h3><a name="_Implementation2"></a>3. Implementation #1 of Conv2d forward and backward   </h3>
 <p>In order to gain hands-on experience and full understanding of Conv2d, we implemented two versions of the Conv2d, both by subclassing torch.autograd.Function and manually overriding the forward and backward methods. The 1<sup>st</sup> version is kind of collection of multiple small modules including unfold, matrix multiplication, fold, etc. The 2<sup>nd</sup> version is more like brute force implementation of the equations using nested for loops. </p>
 
-<p>To validate our custom implementations, we build a small Conv2d-LeakyReLU-Mean network and compared the outputs and autograd results with the Torch built-in implementation. The LeakyReLU layer is also custom implemented. </p>
+<p>To validate our custom implementations, we build a small <i>Conv2d-LeakyReLU-Mean</i> network and compared the outputs and autograd results with the Torch built-in implementation. The <i>LeakyReLU</i> layer is also custom implemented. </p>
 
 <p>This section covers Version #1 and the compete source code can be found on GitHub (<a href="https://github.com/coolgpu/Demo_Conv2d_forward_and_backward/blob/master/my_conv2d_v1.py">my_conv2d_v1.py</a>). </p>
 
@@ -205,10 +205,10 @@ author: Xiyun Song
 <p>This implementation is inspired by the discussion of using unfold function <a href="https://discuss.pytorch.org/t/custom-convolution-dot-product/14992/3">here</a>. The forward function is overridden to take 5 input arguments: </p>
 <ul>
 	<li><strong>ctx</strong>: represent THIS instance of the class </li>
-	<li><strong>inX</strong>: the 4-D input tensor with a shape of (nImgSamples, nInCh, nInImgRows, nInImgCols)</li>
-	<li><strong>in_weight</strong>: the 4-D learnable convolution kernel with a shape of (nOutCh, nInCh, nKnRows, nKnCols)</li>
-	<li> <strong>in_bias</strong>: 1-D learnable convolution bias with a shape of (nOutCh,) </li>
-	<li> <strong>convparam</strong>: tuple to pass in parameters of (padding, stride), default=(0,1) </li>
+	<li><strong>inX</strong>: the 4-D input tensor with a shape of (<i>nImgSamples, nInCh, nInImgRows, nInImgCols</i>)</li>
+	<li><strong>in_weight</strong>: the 4-D learnable convolution kernel with a shape of (<i>nOutCh, nInCh, nKnRows, nKnCols</i>)</li>
+	<li> <strong>in_bias</strong>: 1-D learnable convolution bias with a shape of (<i>nOutCh</i>,) </li>
+	<li> <strong>convparam</strong>: tuple to pass in parameters of (<i>padding, stride</i>), default=(0,1) </li>
 </ul>
 
 
@@ -229,27 +229,30 @@ author: Xiyun Song
 </pre>
 
 
-<p>Line 1: call the unfold function to extract nOutRows x nOutCols patches per sample from the input and each patch has a size of inChannels x nKnRows x nKnCols elements and can be multiplied with the convolution kernels. The input tensor has a shape of (nImgSamples, nInCh, nInImgRows, nInImgCols) and the unfold output tensor has a shape of (nImgSamples, nB=inChannels x nKnRows x nKnCols, nL=nOutRows X nOutCols). </p>
+<p>Line 1: call the unfold function to extract <i>nOutRows x nOutCols</i> patches per sample from the input and each patch has a size of <i>inChannels x nKnRows x nKnCols</i> elements and can be multiplied with the convolution kernels. The input tensor has a shape of (<i>nImgSamples, nInCh, nInImgRows, nInImgCols</i>) and the unfold output tensor has a shape of (<i>nImgSamples, <b>nB</b>=inChannels x nKnRows x nKnCols, <b>nL</b>=nOutRows X nOutCols</i>). </p>
 
-<p>Line 2-4: reshape the unfolded data and kernel to so that the last dimension of inX_nSamp_nL_nB and the first dimension of kn_nB_nOutCh have the same size (nB) for matrix multiplication. </p>
+<p>Line 2-4: reshape the unfolded data and kernel to so that the last dimension of <i>inX_nSamp_<b>nL_nB</b></i> and the first dimension of <i>kn_<b>nB</b>_nOutCh</i> have the same size (<i><b>nB</b></i>) for matrix multiplication. </p>
 
 <p>Line 5: Apply matrix multiplication. </p>
 
 <p>Line 6-7: Reshape the result to match the output shape. </p>
 
-<p>Line 8: Add the bias, if specified, to obtain the final output from MyConv2d. </p>
+<p>Line 8: Add the bias, if specified, to obtain the final output from <i>MyConv2d</i>. </p>
 
-<p>It returns a 4-D tensor of the convolution results with a shape of (nImgSamples, nOutCh, nOutRows, nOutCols). </p>
+<p>It returns a 4-D tensor of the convolution results with a shape of (<i>nImgSamples, nOutCh, nOutRows, nOutCols</i>). </p>
 
 <h4>3.2. Backward in Version #1</h4>
-<p>The backward function is overridden to take one argument (in addition to THIS instance ctx), which must match the output list of the forward function:
-•	grad_from_upstream: the 4-D tensor of the upstream gradient for the convolution. It has the same shape as the forward output, (nImgSamples, nOutCh, nOutRows, nOutCols) 
+<p>The backward function is overridden to take one argument (in addition to THIS instance <i>ctx</i>), which must match the output list of the forward function:</p>
 
-<p>The backward function must return the same number of items as the argument list of the forward function, not including ctx. More specifically, it must return 3 gradients of the loss w.r.t. to inX, in_weight and in_bias (if specified, otherwise a None) respectively, plus a None for convparam that is just a tuple of parameters and does not require gradient. </p>
+<ul>
+	<li><strong>grad_from_upstream</strong>: the 4-D tensor of the upstream gradient for the convolution. It has the same shape as the forward output, (<i>nImgSamples, nOutCh, nOutRows, nOutCols</i>)</li>
+</ul>
+
+<p>The backward function must return the same number of items as the argument list of the forward function, not including ctx. More specifically, it must return 3 gradients of the loss w.r.t. to <i>inX</i>, <i>in_weight</i> and <i>in_bias</i> (if specified, otherwise a None) respectively, plus a None for convparam that is just a tuple of parameters and does not require gradient. </p>
 
 <p>Please see the <a href="https://github.com/coolgpu/Demo_Conv2d_forward_and_backward/blob/master/my_conv2d_v1.py">source code</a> for detailed implementation and it is quite self-explanatory with comments above each step. In fact, it starts from the upstreaming gradient, using the chain rule as discussed in the <a href="https://coolgpu.github.io/coolgpu_blog/github/pages/2020/09/14/backpropagation.html#_Derivation_of_the_gradients"> previous posts</a>, and computes the gradients of each step of the forward function in reversed order. </p>
 
-<p>It is worth mentioning that, because inX_nSamp_nL_nB and kn_nB_nOutCh are involved in matrix multiplication, we used the conclusion from the <a href="https://coolgpu.github.io/coolgpu_blog/github/pages/2020/09/22/matrixmultiplication.html#_Summary">previous post</a> to calculate their gradients: </p>
+<p>It is worth mentioning that, because <i>inX_nSamp_nL_nB</i> and <i>kn_nB_nOutCh</i> are involved in matrix multiplication, we used the conclusion from the <a href="https://coolgpu.github.io/coolgpu_blog/github/pages/2020/09/22/matrixmultiplication.html#_Summary">previous post</a> to calculate their gradients: </p>
 
 
 <div class="alert alert-secondary equation">
@@ -258,9 +261,10 @@ author: Xiyun Song
 
 <p>for the matrix multiplication of \( \boldsymbol {C} = \boldsymbol {A} \boldsymbol {B} \). </p>
 
-<p>Another thing to note is that the fold function is called, like a counterpart of the unfold function used in the forward function, to sum and patch the intermediate gradient data grad_inX_nSamp_nB_nL back into the shape of inX, (nImgSamples, nInCh, nInImgRows, nInImgCols). </p>
+<p>Another thing to note is that the fold function is called, like a counterpart of the unfold function used in the forward function, to sum and patch the intermediate gradient data <i>grad_inX_nSamp_nB_nL</i> back into the shape of <i>inX</i>, (<i>nImgSamples, nInCh, nInImgRows, nInImgCols</i>). </p>
 
-<h3><a name="_Implementation2"></a>4.	 Implementation #2 of Conv2d forward and backward </h3>  
+
+<h3><a name="_Implementation2"></a>4. Implementation #2 of Conv2d forward and backward </h3>  
 <p>The 2<sup>nd</sup> version of implementation of Conv2d has the same interfaces of the forward and backward function when subclassing torch.autograd.Function. Different from the 1<sup>st</sup> version that is a collection of multiple steps, the 2<sup>nd</sup> version directly implements the equations (1) and (2) using 3 nested for loop. Please see the complete source code of this implementation (<a href="https://github.com/coolgpu/Demo_Conv2d_forward_and_backward/blob/master/my_conv2d_v2.py">my_conv2d_v2.py</a>) on GitHub. </p>
 
 <h4>4.1. Forward in Version #2 </h4>
@@ -284,12 +288,12 @@ for outCh in range(nOutCh):
 </pre>
 
 
-<p>Similarly to the 1<sup>st</sup> version, it returns a 4-D tensor of the convolution results with a shape of (nImgSamples, nOutCh, nOutRows, nOutCols). </p>
+<p>Similarly to the 1<sup>st</sup> version, it returns a 4-D tensor of the convolution results with a shape of (<i>nImgSamples, nOutCh, nOutRows, nOutCols</i>). </p>
 
 <h4>4.2. Backward in Version #2</h4>
-<p>Again, the backward function must return 3 gradients of the loss w.r.t. to inX, in_weight and in_bias (if specified, otherwise a None) respectively, plus a None for convparam that is just a tuple of parameters and does not require gradient. </p>
+<p>Again, the backward function must return 3 gradients of the loss w.r.t. to <i>inX</i>, <i>in_weight</i> and <i>in_bias</i> (if specified, otherwise a <i>None</i>) respectively, plus a <i>None</i> for convparam that is just a tuple of parameters and does not require gradient. </p>
 
-<p>It uses the same 3 nested for loops to compute the gradients and the core part is listed below. Inside the center of the loops, it also follows the two key ideas of the backpropagation chain rule: 1) summation of all paths and 2) product of upstream and local gradients along each path. Pleate note that, in calculation of the gradients of the kernel (grad_weight), the results are summed with sum(axis=0) because the kernel is applied to all samples, which is the 1<sup>st</sup> dimension (axis=0). The same logic applies to grad_bias too. </p>
+<p>It uses the same 3 nested for loops to compute the gradients and the core part is listed below. Inside the center of the loops, it also follows the two key ideas of the backpropagation chain rule: 1) summation of all paths and 2) product of upstream and local gradients along each path. Pleate note that, in calculation of the gradients of the kernel (<i>grad_weight</i>), the results are summed with <i>sum(axis=0)</i> because the kernel is applied to all samples, which is the 1<sup>st</sup> dimension (<i>axis=0</i>). The same logic applies to grad_bias too. </p>
 
 <pre class="pre-scrollable">
 	<code class="python">
@@ -318,7 +322,7 @@ if in_bias is not None:
   
 
 <h3><a name="_Validation"></a>5. Validation against Torch built-ins   </h3>
-<p>To validate our custom implementations, we build a small <strong>Conv2d-LeakyReLU-Mean</strong> network (Figure 5) and compared the outputs and autograd results with the Torch built-in implementation<sup>[<a href="#_Reference1">1</a>]</sup>. The LeakyReLU layer is also custom implemented and <a href="https://github.com/coolgpu/Demo_Conv2d_forward_and_backward/blob/master/myLeakyReLU.py">the source code can be found here</a>. The validation code can be found <a href="https://github.com/coolgpu/Demo_Conv2d_forward_and_backward/blob/master/Test_my_conv2d_leakyReLU_forward_backward.py">here</a>. Results show that both implementations of Conv2d produced the same results as the Torch built-ins, including the output and the gradients w.r.t. the input, kernel and bias. </p>
+<p>To validate our custom implementations, we build a small <strong><i>Conv2d-LeakyReLU-Mean</i></strong> network (Figure 5) and compared the outputs and autograd results with the Torch built-in implementation<sup>[<a href="#_Reference1">1</a>]</sup>. The <i>LeakyReLU</i> layer is also custom implemented and <a href="https://github.com/coolgpu/Demo_Conv2d_forward_and_backward/blob/master/myLeakyReLU.py">the source code can be found here</a>. The validation code can be found <a href="https://github.com/coolgpu/Demo_Conv2d_forward_and_backward/blob/master/Test_my_conv2d_leakyReLU_forward_backward.py">here</a>. Results show that both implementations of Conv2d produced the same results as the Torch built-ins, including the output and the gradients w.r.t. the input, kernel and bias. </p>
 
 <p align="center">
  <img src="{{ "/assets/images/Conv2d_LeakyReLU_Mean_network.png" | relative_url }}" style="border:solid; color:gray" width="350"> 
@@ -327,7 +331,7 @@ if in_bias is not None:
     
 
 <h3><a name="_Summary"></a>6. Summary </h3> 
-<p>In this post, we discussed the fundamentals of Conv2d and demonstrated how to implement its forward and backward autograd functions using 2 different ways. In the end, we built a simple BatchNorm-Sigmoid-MSELoss network to test our implementations. While we used Conv2d as the example, all ideas can be extended to Conv1d and Conv3d. We hope that, by going through this example, it can help us obtain a deeper understanding of the convolution in neural networks. In next post, we will move to ConvTranpose. </p>
+<p>In this post, we discussed the fundamentals of Conv2d and demonstrated how to implement its forward and backward autograd functions using 2 different ways. In the end, we built a simple <strong><i>Conv2d-LeakyReLU-Mean</i></strong> network to test our implementations. Only Conv2d is used as example, but all ideas can be extended to Conv1d and Conv3d. We hope that, by going through this example, it can help us obtain a deeper understanding of the convolution in neural networks. In next post, we will move to ConvTranpose. </p>
 
 <h3><a name="_Extra"></a>7.	Extra – Edge detection and Smoothing using pre-defined kernels</h3>
 <p>While the convolution kernel and bias are learnable parameters in convolutional neural networks, standalone Conv2d can also be used to perform specific tasks using pre-defined kernels. In this section, we would like to demonstrate two applications of Conv2d: edge detection and smoothing. In both examples, we use the same input image as shown in Figure 6. </p>
