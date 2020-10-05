@@ -325,7 +325,7 @@ if in_bias is not None:
 <p>To validate our custom implementations, we build a small <strong><i>Conv2d-LeakyReLU-Mean</i></strong> network (Figure 5) and compared the outputs and autograd results with the Torch built-in implementation<sup>[<a href="#_Reference1">1</a>]</sup>. The <i>LeakyReLU</i> layer is also custom implemented and <a href="https://github.com/coolgpu/Demo_Conv2d_forward_and_backward/blob/master/myLeakyReLU.py">the source code can be found here</a>. The validation code can be found <a href="https://github.com/coolgpu/Demo_Conv2d_forward_and_backward/blob/master/Test_my_conv2d_leakyReLU_forward_backward.py">here</a>. Results show that both implementations of Conv2d produced the same results as the Torch built-ins, including the output and the gradients w.r.t. the input, kernel and bias. </p>
 
 <p align="center">
- <img src="{{ "/assets/images/Conv2d_LeakyReLU_Mean_network.png" | relative_url }}" style="border:solid; color:gray" width="350"> 
+ <img src="{{ "/assets/images/Conv2d_LeakyReLU_Mean_network.png" | relative_url }}" style="border:solid; color:gray" width="600"> 
 <br>Figure 5 Illustration of Conv2d-LeakyReLU-Mean network used for validation. 
 </p> 
     
@@ -337,7 +337,7 @@ if in_bias is not None:
 <p>While the convolution kernel and bias are learnable parameters in convolutional neural networks, standalone Conv2d can also be used to perform specific tasks using pre-defined kernels. In this section, we would like to demonstrate two applications of Conv2d: edge detection and smoothing. In both examples, we use the same input image as shown in Figure 6. </p>
 
 <p align="center">
- <img src="{{ "/assets/images/Conv2d_leaf_original.png" | relative_url }}" style="border:solid; color:gray" width="350"> 
+ <img src="{{ "/assets/images/Conv2d_leaf_original.png" | relative_url }}" style="border:solid; color:gray" width="600"> 
 <br>Figure 6 The original image of leaves. 
 </p> 
    
@@ -360,7 +360,7 @@ if in_bias is not None:
 <p>The source code can be found <a href="https://github.com/coolgpu/Demo_Conv2d_forward_and_backward/blob/master/Conv2d_Extra.py">here</a> and the output image is shown in Figure 7. </p>
 
 <p align="center">
- <img src="{{ "/assets/images/Conv2d_leaf_sobel_edge_out.png" | relative_url }}" style="border:solid; color:gray" width="350"> 
+ <img src="{{ "/assets/images/Conv2d_leaf_sobel_edge_out.png" | relative_url }}" style="border:solid; color:gray" width="600"> 
 <br>Figure 7 The Sobel edge detection output image. 
 </p> 
 
@@ -382,7 +382,7 @@ if in_bias is not None:
 <p>The source code can be found <a href="https://github.com/coolgpu/Demo_Conv2d_forward_and_backward/blob/master/Conv2d_Extra.py">here</a> and the blurred output image is shown in Figure 8. </p>
 
 <p align="center">
- <img src="{{ "/assets/images/Conv2d_leaf_gaussian_blur_out.png" | relative_url }}" style="border:solid; color:gray" width="350"> 
+ <img src="{{ "/assets/images/Conv2d_leaf_gaussian_blur_out.png" | relative_url }}" style="border:solid; color:gray" width="600"> 
 <br>Figure 8 The the Gaussian blurred output image.
 </p> 
 
