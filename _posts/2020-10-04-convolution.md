@@ -1,386 +1,384 @@
 ---
 layout: post
 mathjax: true
-title:  "Understanding Conv2d and ConvTrans2d in Neural Networks - Part 1. Convolution and Its Gradients"
-date:   2020-10-04 10:45:00 -0700
+title:  "Understanding Conv2d and ConvTrans2d in Neural Networks - Part 2. Convolution and Its Gradients"
+date:   2020-10-04 9:45:00 -0700
 categories: github pages
 author: Xiyun Song
 ---
 
-<p>A neural network model typically learns from iterative training processes to optimize values for its trainable parameters. The major steps in each iteration include forward pass, loss calculation, backward pass and parameter update. </p>
-<ul>
-<li>The forward pass is the process to compute outputs from input. </li>
-<li>Compute loss that is simply a scalar number indicating the disparity betwen the model's predicted output and the ground truth. </li>
-<li>The backward pass is the process to compute gradients of the loss with respect to (w.r.t.) each trainable parameter, which indicates how much the parameters need to change in the negative direction to minimize the loss. </li>
-<li>Update the trainable parameters based on their gradients using a certain algorithm e.g. Adam<sup>[<a href="#_Reference1">1</a>]</sup> so that the loss decreases.</li>
-</ul> 
+<p>In the last post, we discussed matrix multiplication and derivation of its gradients. In this post, we will talk about convolution, the 2<sup>nd</sup> part of the series. </p>
 
-<p>Among these steps, the backward pass, which is typically done using backpropagation with chain rule to effectively compute gradients, is the most complex. Fortunately, we are required to define only the forward pass when building a neural network and popular deep learning frameworks such as PyTorch and Tensorflow will do backpropagation for us automatically, referred to as Autograd. While this brings convenience, it also causes confusion around backpropagation, the heart of every neural network. In fact, a clear understanding and hands-on experience with backpropagation is critical for anyone who would like to be an AI expert. Therefore, in this post, I would like to use a simple network example to demonstrate how to compute gradients using the chain rule and manually implement it. Hopefully, this could help those of us with some basic knowledge of neural network and calculus to gain a more solid understanding of it. </p>
 
-<p>This post is organized in the following sections: </p>
 <ul>
-	<li><a href="#_The_simple_network">The simple network model</a></li>
-	<li><a href="#_Derivation_of_the_gradients">Derivation of gradients using backpropagation chain rule</a></li>
-	<li><a href="#_Custom_implementations_and_validation">Custom implementations and validation </a></li>
+	<li><a href="https://coolgpu.github.io/coolgpu_blog/github/pages/2020/09/22/matrixmultiplication.html">Matrix multiplication and its custom implementation</a></li>
+	<li><a href="">Conv2d and its custom implementation (this post)</a></li>
+	<li>ConvTranpose2d and its custom implementation </li>
+	<li>Application of Conv2d and ConvTranpose2d in Neural Networks</li>
+</ul>
+
+<p>Because 2-dimensional (2-D) scenarios are the most common one in image deep learning, we will use 2-D convolution, referred to as Conv2d, as an example through this post, but the fundamentals can be extended to 1-D and 3-D scenarios as well. Please note that the two dimensions above means the height and width of an image. The other dimensions, such as batch samples and feature channels of each sample, are not counted here. Therefore, if the batch sample and feature channel dimensions are also considered, a batch of 2-D data will be represented in a 4-D tensor [Samples, Channels,<strong> Height, Width</strong>]: the 1<sup>st</sup> dimension for the batch samples, the 2<sup>nd</sup> one for feature channels, the 3<sup>rd</sup> one for height, and the 4<sup>th</sup> one for width. However, the basic convolution operations (including padding, stride, etc.) are performed within the height-width plane, not across the feature channels or batch samples. This is why it is called 2-D convolution even though 4-D tensors are actually used. Similarly, batch data in 1-D and 3-D scenarios will be represented in 3-D and 5-D tensors, respectively, but the corresponding convolution is still called 1-D convolution and 3-D convolution, respectively. </p>
+
+<p>Hands-on practice is the best teacher for learning, so we will also demonstrate how to implement our own versions of Conv2d, including both forward and backward propagation. By going through this example, we hope it helps gain clear understanding of the concepts of Conv2d, output image dimensions, and how to calculate its gradients of weights, bias and inputs. Here are the outlines of this post. </p>
+
+<ul>
+	<li><a href="#_Conv2d">Conv2d</a></li>
+	<li><a href="#_Dimensions">Input and output dimensions</a></li>
+	<li><a href="#_Custom_implementation1">Implementation #1 of Conv2d forward and backward </a></li>
+	<li><a href="#_Custom_implementation2">Implementation #2 of Conv2d forward and backward </a></li>	
+	<li><a href="#_Validation">Validation against the Torch Build-ins  </a></li>	
 	<li><a href="#_Summary">Summary</a></li>
 	<li><a href="#_Extra">Extra</a></li>
 	<li><a href="#_References">References</a></li>
 </ul>
 
-<h3><a name="_The_simple_network"></a>1. The simple network model</h3>  
-<p>The example network model is illustrated in Figure 1. It consists of two layers (BatchNorm module and activator Sigmoid) followed by a mean square error (MSE) loss module. Let’s take a look at the forward pass (from bottom to top).</p>
-
-<p align="center">
- <img src="{{ "/assets/images/Model1.png" | relative_url }}" style="border:solid; color:gray" width="350"> 
-<br>Figure 1 Illustration of the example network. 
-</p> 
+<h3><a name="_Conv2d"></a>1. Conv2d</h3>  
+<p>Discrete convolution is used in neural networks to extract features of input images by applying a dot product with a sliding kernel. Let’s introduce two terminologies relevant to convolution:</p>
 
 
-<p><strong>Input \(\vec x\)</strong>: a multi-dimensional dataset of \({N_s}\) samples, referred to as a &ldquo;batch&rdquo;, and each sample contains \({N_c}\) feature channels of \({N_k} = {N_{height} } \times {N_{row} } \times {N_{col} }\)  elements. </p>
-<div class="alert alert-secondary equation">
-	<span>\(\vec x = \left\{ { {x_{s,c,k} } } \right\}\)	</span><span class="ref-num"> (1) </span>
-</div>
-
-<p>where \(s \in \left[ {1,\;{N_s} } \right]\), \(c \in \left[ {1,\;{N_c} } \right]\) and \(k \in \left[ {1,\;{N_k} } \right]\) are the indices along individual dimesions.</p>
-
-<p><strong>BatchNorm layer</strong>: a module that was proposed by Ioffe and Szegedy<sup>[<a href="#_Reference2">2</a>]</sup> and is widely used in neural networks to help make the training faster and more stable through normalization of the batch data by re-centering and re-scaling. BatchNorm is applied across all samples in the batch but for each feature channel separately. The blue color of the data in Figure 1 represents one channel. The output \(\vec y\) from BatchNorm is computed as </p>
-
-<div class="alert alert-secondary equation">
-	<span>\({y_{s,c,k} } = {w_c} \cdot \frac{ { {x_{s,c,k} } - {\mu _c} } }{ {\sqrt {\sigma _c^2} } } + {\beta _c}\) </span><span class="ref-num"> (2)</span>
-</div>
-
-<p>where \({w_c}\) and \({\beta _c}\) are the trainable parameter, \({\mu _c}\) and \(\sigma _c^2\) are the mean and biased variance of the \(c\)-th channel of the given batch data, </p>
-
-<div class="alert alert-secondary">
-	<p class="equation"><span> \({\mu _c} = \frac{1}{ { {N_s} \times {N_k} } }\mathop \sum \limits_{s = 1}^{ {N_s} } \mathop \sum \limits_{k = 1}^{ {N_k} } {x_{s,c,k} }\) </span><span class="ref-num"> (3) </span></p>
-		
-	<p class="equation"><span> \(\sigma _c^2 = \frac{1}{ { {N_s} \times {N_k} } }\mathop \sum \limits_{s = 1}^{ {N_s} } \mathop \sum \limits_{k = 1}^{ {N_k} } {\left( { {x_{s,c,k} } - {\mu _c} } \right)^2}\) </span><span class="ref-num"> (4)	</span></p>
-</div>
-	
-	
-<p>Please note that because all computation are cross the dimensions of \(s\) and \(k\), we can combine these dimensions into a single index \(i \in \left[ {1,{N_s} \times {N_k} } \right]\) and rewrite Equations (2) through (4) equivalently as the following for simplicity:</p>
-
-<div class="alert alert-secondary">
-	<p class="equation"><span> \({y_{c,i} } = {w_c} \cdot \frac{ { {x_{c,i} } - {\mu _c} } }{ {\sqrt {\sigma _c^2} } } + {\beta _c}\) </span><span class="ref-num">(5)</span></p>
-
-	<p class="equation"><span> \({\mu _c} = \frac{1}{ { {N_i} } }\mathop \sum \limits_{j = 1}^{ {N_i} } {x_{c,j} }\) </span><span class="ref-num">(6)</span></p>
-	<p class="equation">
-	<span> \(\sigma _c^2 = \frac{1}{ { {N_i} } }\mathop \sum \limits_{j = 1}^{ {N_i} } {\left( { {x_{c,j} } - {\mu _c} } \right)^2}\)	</span><span class="ref-num">(7) </span></p>
-</div>
-
-<p>where \({N_i} = {N_s} \times {N_k}\) and \(j \in \left[ {1,{N_i} } \right]\).</p>
-
-<p>We also want to mention that BatchNorm is selected to be included in this example because while its forward computing is much simpler than some other modules such as ConvNd and ConvTransNd, its backward computing for gradients is surprisingly more complex than those modules. By going through the harder example of BatchNorm, we hope it helps with the other easier cases. </p>
-
-<p><strong>Sigmoid layer</strong>: an activator function whose output \(\vec z\) is defined as </p>
-
-<div class="alert alert-secondary equation">
-	<span> \({z_{c,i} } = \frac{1}{ {1 + {e^{ - {y_{c,i} } } } } }\)</span><span class="ref-num">(8)</span>
-</div>
-
-<p>\(\vec z\) is also the output of the network. Sigmoid is applied to each element in each channel of each sample independently. The index of \(c\) is kept in Equation (8) for convenience of gradient derivation using backpropagation later. So far the equations (5) and (8) form the forward pass of the network.</p>
-
-<p><strong>MSE Loss function</strong>: the scalar MSE loss, \(L\), is computed as </p>
-
-<div class="alert alert-secondary equation">
-	<span> \(L = \frac{1}{N}\mathop \sum \limits_{c = 1}^{ {N_c} } \mathop \sum \limits_{i = 1}^{ {N_i} } {\left( { {z_{c,i} } - {t_{c,i} } } \right)^2}\)</span><span class="ref-num">(9)</span>
-</div>
-
-<p>where \(N = {N_c} \times {N_i}\). In other words, the loss is the mean of the squared error of all elements in all channels of all samples between the network output \(\vec z\) and the target dataset \(\vec t\).</p>
-
-<p>With all components of this example network being defined, the main goal here is to compute the gradients of the loss \(L\) w.r.t. the trainable parameters \(\vec w\) and \(\vec \beta \) and the input \(\vec x\) : \(\frac{ {\partial L} }{ {\partial \vec w} }\), \(\frac{ {\partial L} }{ {\partial \vec \beta } }\), and \(\frac{ {\partial L} }{ {\partial \vec x} }\), respectively. You might have a question: since \(\vec x\) is an input instead of a trainable parameter, why bother to compute the partial derivative \(\frac{ {\partial L} }{ {\partial \vec x} }\)? The answer is that BatchNorm in a network typically takes the output from other layers (e.g. Conv2d, which is not included in this network for simplicity) as its input \(\vec x\), and calculation of gradients in those layers requires \(\frac{ {\partial L} }{ {\partial \vec x} }\) being available. </p>
-
-<p>BTW, this post is not focused on parameter update from the gradients, so that part is not included in this post. We can write separate posts about that too.    </p>
-
-<h3><a name="_Derivation_of_the_gradients"></a>2. Derivation of the gradients</h3>
-<h4>2.1 The chain rule</h4>
-<p>We will follow the chain rule to do backpropagation to compute gradients. Since there is a huge amount of online resources available talking about the chain rule, we just summarize its main idea here. Given a function \(L\left( { {x_1},{x_2}, \ldots {x_N} } \right)\) as</p>
-
-<div class="alert alert-secondary equation">
-	<span> \(L\left( { {x_1}, \ldots {x_N} } \right) = L\left( { {f_1}\left( { {x_1}, \ldots {x_N} } \right),{f_2}\left( { {x_1}, \ldots {x_N} } \right), \ldots ,{f_M}\left( { {x_1}, \ldots {x_N} } \right)} \right)\)</span><span class="ref-num">(10)</span>
-</div>
-
-<p>Then the gradient of \(L\) w.r.t \({x_i}\) can be computed as </p>
-
-<div class="alert alert-secondary equation">
-	<span>\(\frac{ {\partial L} }{ {\partial {x_i} } } = \frac{ {\partial L} }{ {\partial {f_1} } }\frac{ {\partial {f_1} } }{ {\partial {x_i} } } + \frac{ {\partial L} }{ {\partial {f_2} } }\frac{ {\partial {f_2} } }{ {\partial {x_i} } } +\cdots + \frac{ {\partial L} }{ {\partial {f_M} } }\frac{ {\partial {f_M} } }{ {\partial {x_i} } } = \mathop \sum \limits_{m = 1}^M \frac{ {\partial L} }{ {\partial {f_m} } }\frac{ {\partial {f_m} } }{ {\partial {x_i} } }\)</span><span class="ref-num">(11)</span>
-</div>
-
-<p>Equation (11) can be understood from two perspectives:</p>
 <ul>
-<li>Summation means that all possible paths through which \({x_i}\) contributes to \(L\) should be included</li>
-<li>Product means that, along each path \(m\), the output gradient equals the upstream passed in, \(\frac{ {\partial L} }{ {\partial {f_m} } }\), times the local gradient, \(\frac{ {\partial {f_m} } }{ {\partial {x_i} } }\). </li>
+	<li><strong>Stride</strong>: the step size (in unit of pixels) of the kernel when sliding over the input image. When the step size is 1 (stride=1), it is called unit stride.</li>
+	<li><strong>Padding</strong>: Padding means extend the input image area by adding extra columns and rows of pixels to the outside border of the image. If all added pixels are filled with value zero, it is called zero-padding, which is the most common mode of padding.</li>
 </ul>
 
-<h4>2.2 Dimensions of the gradients</h4>
-<p>Please note that, the loss function in a neural network gives a scalar value output loss. The gradient of the loss w.r.t. any trainable parameter or input variable should have the same dimension as that parameter or variable, whether it is another scalar, or a 1-D vector, or N-D array. </p>
+
+<h4>1.1.	Basic Conv2d with unit stride and no padding  </h4>
+<p>We will start with the simplest case: Stride=1 and no padding. Given an input image \(\boldsymbol {I}\left( {y,x} \right)\) with an image size of \(\left( { {N_y},{N_x} } \right)\) and a sliding kernel \( \boldsymbol {K} \left( {u,v} \right)\) with \({N_u}\) rows and \({N_v}\) columns, the output, \( \boldsymbol {O} \), of the convolution between \( \boldsymbol {I} \) and \( \boldsymbol {K} \) can be defined as </p>
+
+
+<div class="alert alert-secondary equation">
+	<span>\( \boldsymbol {O} \left( {y,x} \right) =  \boldsymbol {I}  \otimes  \boldsymbol {K}  = \mathop \sum \limits_{u = 1}^{ {N_u} } \mathop \sum \limits_{v = 0}^{ {N_v} }  \boldsymbol {I} \left( {y + u,x + v} \right) \boldsymbol {K} \left( {u,v} \right)\) </span><span class="ref-num"> (1)</span>
+</div>
  
-<p>For example, the trainable parameter \(\vec w = \left( { {w_1},{w_2}, \ldots {w_{ {N_c} } } } \right)\)  of the Batch Norm module is a 1-D vector containing \({N_c}\) elements with one element corresponding to one channel; therefore, the gradient \(\frac{ {\partial L} }{ {\partial \vec w} }\) should also be a 1-D vector containing \({N_c}\) elements, \(\frac{ {\partial L} }{ {\partial \vec w} } = \left( {\frac{ {\partial L} }{ {\partial {w_1} } },\frac{ {\partial L} }{ {\partial {w_2} } }, \ldots \frac{ {\partial L} }{ {\partial {w_{ {N_c} } } } } } \right)\). </p>
- 
-<h4>2.3 Derivation of the gradient \(\frac{ {\partial L} }{ {\partial \vec w} }\)  </h4> 
-<p>Let’s first derive the upstream gradients using the chain rule to derive \(\frac{ {\partial L} }{ {\partial \vec w} }\) or element-wise \(\frac{ {\partial L} }{ {\partial {w_c} } }\).</p>
-<p>From Equation (9) for the MSE loss function, we have the partial derivative</p>
+<p>Where \( \otimes \) denotes the "convolution" operation, \(u\) and \(v\) are the indices of the rows and columns of the kernel, respectively. </p>
 
-<div class="alert alert-secondary equation">
-	<span>\(\frac{ {\partial L} }{ {\partial {z_{c,i} } } } = \frac{2}{N}\left( { {z_{c,i} } - {t_{c,i} } } \right)\)</span><span class="ref-num">(12)</span>
-</div>
-	
-<p>From Equation (8), we have the local partial derivative of the sigmoid function</p>
+<p>Looking at Equation (1), you might have a question: “Wait! Isn’t this a correlation, not a convolution?” Very good! You are right. It is cross-correlation, not a convolution defined in math that requires a flip of the kernel before the product. If the kernel is not symmetric both in horizontal and vertical directions, the results of cross-correction and convolution from the same input image \( \boldsymbol {I} \) and kernel \( \boldsymbol {K} \) will be different. However, in neural networks, the elements in the kernel are trainable parameters, which means that their values come from training.  Either flip or not flip, you still get the same values except their locations in the kernel are flipped, so it really doesn’t matter. Therefore, the terminology “convolution” is used for the cross-correlation in neural networks. </p>
 
-<div class="alert alert-secondary equation">
-	<span>\(\frac{ {\partial {z_{c,i} } } }{ {\partial {y_{c,i} } } } = \frac{ { {e^{ - {y_{c,i} } } } } }{ { { {\left( {1 + {e^{ - {y_{c,i} } } } } \right)}^2} } } = \frac{1}{ {\left( {1 + {e^{ - {y_{c,i} } } } } \right)} } \cdot \frac{ {1 - \left( {1 - {e^{ - {y_{c,i} } } } } \right)} }{ {\left( {1 + {e^{ - {y_{c,i} } } } } \right)} } = {z_{c,i} }\left( {1 - {z_{c,i} } } \right)\)</span><span class="ref-num">(13)</span>
-</div>
-
-<p>Note that, there is only one path from \({y_{c,i} }\) to \(L\), which is via \({z_{c,i} }\). Therefore, the gradient of \(L\) w.r.t. \({y_{c,i} }\) is simply the product of \(\frac{ {\partial L} }{ {\partial {z_{c,i} } } }\) and \(\frac{ {\partial {z_{c,i} } } }{ {\partial {y_{c,i} } } }\) without summation.</p>
-
-<div class="alert alert-secondary equation">
-	<span>\(\frac{ {\partial L} }{ {\partial {y_{c,i} } } } = \frac{ {\partial L} }{ {\partial {z_{c,i} } } }\cdot\frac{ {\partial {z_{c,i} } } }{ {\partial {y_{c,i} } } } = \frac{ {\partial L} }{ {\partial {z_{c,i} } } }\cdot {z_{c,i} }\left( {1 - {z_{c,i} } } \right)\)</span><span class="ref-num">(14)</span>
-</div>
-
-<p>This is also the upstream gradient for the BatchNorm layer. The local gradient for \(\vec w\) can be derived from Equation (5) </p>
-
-<div class="alert alert-secondary equation">
-	<span>\(\frac{ {\partial {y_{c,i} } } }{ {\partial {w_c} } } = \frac{ { {x_{c,i} } - {\mu _c} } }{ {\sqrt {\sigma _c^2} } } = \frac{ { {y_{c,i} } - {\beta _c} } }{ { {w_c} } }\)</span><span class="ref-num">(15)</span>
-</div>
-
-<p>Now, using the chain rule, we take the product of the upstream gradient from Equation (14) and the local gradient from Equation (15), and sum all paths together to get </p>
-
-<div class="alert alert-secondary equation">
-	<span>\(\frac{ {\partial L} }{ {\partial {w_c} } } = \mathop \sum \limits_{i = 1}^{ {N_i} } \frac{ {\partial L} }{ {\partial {y_{c,i} } } }\frac{ {\partial {y_{c,i} } } }{ {\partial {w_c} } } = \mathop \sum \limits_{i = 1}^{ {N_i} } \frac{ {\partial L} }{ {\partial {y_{c,i} } } }\frac{ { {y_{c,i} } - {\beta _c} } }{ { {w_c} } }\)</span><span class="ref-num">(16)</span>
-</div>
-
-<p>The upstream gradient terms in Equations (14) and (16) are not substituted with their expanded format because their values have been computed and are available from upstream calculation, so there is no need to re-compute them every time they are used. That’s why the chain rule is an effective method for backpropagation.</p>
-
-<h4>2.4 Derivation of gradient \(\frac{ {\partial L} }{ {\partial \vec \beta } }\)  </h4> 
-<p>Similarly, the local gradient for \(\vec \beta \) can be derived from Equation (5) for BatchNorm</p>
-
-<div class="alert alert-secondary equation">
-	<span>\(\frac{ {\partial {y_{c,i} } } }{ {\partial {\beta _c} } } = 1\)</span><span class="ref-num">(17)</span>
-</div>
-
-<p>Now using the chain rule, we have</p>
-
-<div class="alert alert-secondary equation">
-	<span>\(\frac{ {\partial L} }{ {\partial {\beta _c} } } = \mathop \sum \limits_{i = 1}^{ {N_i} } \frac{ {\partial L} }{ {\partial {y_{c,i} } } }\frac{ {\partial {y_{c,i} } } }{ {\partial {\beta _c} } } = \mathop \sum \limits_{i = 1}^{ {N_i} } \frac{ {\partial L} }{ {\partial {y_{c,i} } } }\cdot1 = \mathop \sum \limits_{i = 1}^{ {N_i} } \frac{ {\partial L} }{ {\partial {y_{c,i} } } }\)</span><span class="ref-num">(18)</span>
-</div>
-
-<h4>2.5 Derivation of gradient \(\frac{ {\partial L} }{ {\partial \vec x} }\)   </h4>
-<p>Derivation of gradient w.r.t \(\vec x\) is more complicated than \(\vec w\) and \(\vec \beta \) because each \({x_{c,i} }\) directly contributes to \({y_{c,i} }\) and also indirectly contributes to other \({y_{c,k} }\) elements via \({\mu _c}\left( { {x_{c,1} }, \ldots ,{x_{c,{N_i} } } } \right)\) and \({\sigma ^2}_c\left( { {x_{c,1} }, \ldots ,{x_{c,{N_i} } } } \right)\), as shown in Figure 2. To help understand the underneath logic, we will demonstrate two different ways to solve this challenge and achieve the same solution. </p>
+<p>Pictures tells better stories. Animation in Figure 1 illustrates a convolution for a 3x3 kernel applied to a 5x5 input to get a 3x3 output. </p>
 
 <p align="center">
- <img src="{{ "/assets/images/Model2.png" | relative_url }}" style="border:solid; color:gray" width="350">
- <div class="thecap" style="text-align:center">Figure 2 Illustration of the contribution paths</div>
+ <img src="{{ "/assets/images/Conv2d_0p_1s_1inCh.gif" | relative_url }}" style="border:solid; color:gray" width="500"> 
+<br>Figure 1 Illustration of "convolution", actually cross-correlation. 
+</p> 
+
+<p>A few things can be noted in the animation. </p>
+
+<ul>
+	<li>Each output pixel equals the sum of element-based products between the convolution kernel \( \boldsymbol {K} \) and a patch of the input image \( \boldsymbol {I} \) with the same size of the kernel. </li>
+	<li>The calculation will be repeated by sliding the kernel for the next patch of the input image, until the right/bottom edge of the kernel reaches the right/bottom edge of the input image.</li>
+	<li>In this specific example of unit stride and no padding, the size of the output image \( \boldsymbol {O} \) is 3x3 and smaller than the size of the input image \( \boldsymbol {I} \), which is 5x5. This is because the kernel cannot slide further right or down beyond the edge of the input image.</li>
+</ul>
+
+
+<h4>1.2.	Multiple feature channel Conv2d with unit stride and no padding  </h4>
+<p>The basic convolution discussed in Section 1.1 can be thought of as the case where the input image has only one feature channel. In real deep learning networks, the number of feature channels of the input and output images of a convolution layer can be any (reasonable) positive integer, for example, 1, 3, 8, etc., depending on specific tasks, how deep and how wide the network would be, and how much hardware resource available, etc. In the case of multi-data and multi-channels, let’s consider a Conv2d with data presented as tensors: a 4-D filter kernel tensor \( \boldsymbol {K} \left( { {N_{outCh} },{N_{inCh} },{N_u},{N_v} } \right)\), a 4-D input tensor \( \boldsymbol {I} \left( { {N_s},{N_{inCh} },{H_{in} },{W_{in} } } \right)\) and a 4-D output tensor \( \boldsymbol {O} \left( { {N_s},{N_{outCh} },{H_{out} },{W_{out} } } \right)\). The \({c_{out} }\)-th output channel result of the \(n\)-th sample, labeled as \( \boldsymbol {O} \left( {n,{c_{out} },*,*} \right)\), can be described by </p>
+
+<div class="alert alert-secondary equation">
+	<span>\( \boldsymbol {O} \left( {n,{c_{out} },*,*} \right) = \mathop \sum \limits_{ {c_{in} } = 1}^{ {N_{inCh} } }  \boldsymbol {I} \left( {n,{c_{in} },*,*} \right) \otimes  \boldsymbol {K} \left( { {c_{out} },{c_{in} },*,*} \right) + \beta \left( { {c_{out} } } \right)\) </span><span class="ref-num"> (2)</span>
+</div>
+
+<p>where \(n \in \left[ {0,\;{N_s} } \right)\) is the index of samples, \({c_{out} } \in \left[ {0,\;{N_{outCh} } } \right)\) is the index of output channels, \({c_{in} } \in \left[ {0,\;{N_{inCh} } } \right)\) is the index of input channels. \( \boldsymbol {I} \left( {n,{c_{in} },*,*} \right)\) represents the \({c_{in} }\)-th input channel of the \(n\)-th sample, just like the 2-D image \( \boldsymbol {I} \left( {x,y} \right)\) in Equation (1); \( \boldsymbol {K} \left( { {c_{out} },{c_{in} },*,*} \right)\) represents the learnable kernel corresponding to the combination of the \({c_{out} }\)-th output channel and the \({c_{in} }\)-th input channel, just like the 2-D kernel \( \boldsymbol {K} \left( {u,v} \right)\) in Equation (1). </p>
+
+<p>The key point of Equation (2) is, for each output channel \({c_{out} }\), to apply Conv2d on each input channel data with the corresponding kernels, then sum the intermediate results across all input channels to obtain the result for the output channel \({c_{out} }\). In the end, a learnable bias \(\beta \left( { {c_{out} } } \right)\) is added to the \({c_{out} }\)-th result. </p>
+
+<p>Animation in Figure 2 illustrates a convolution for a 3x3 kernel applied to 3 channels of 5x5 inputs with no padding and using unit stride to get 1 output channel. If more output channels are desired, each output channel will have a similar but separate path like Figure 2 except that the 3 left-most input channel blocks are shared by all output channels. </p>
+
+<p align="center">
+ <img src="{{ "/assets/images/Conv2d_0p_1s_3inCh.gif" | relative_url }}" style="border:solid; color:gray" width="500"> 
+<br>Figure 2 Illustration of Conv2d with 3 input channels and 1 output channel in the case of unit stride and no padding. 
 </p> 
 
 
-<h5>2.5.1 Solution 1 for derivation of gradient \(\frac{ {\partial L} }{ {\partial \vec x} }\)   </h5>
-Using the chain rule, we have
+<h4>1.3.	Multiple feature channel Conv2d with non-unit stride and padding  </h4>
+<p>The situation gets a little more complex when both non-unit stride and padding are involved in convolution. However, the analysis is still the same. Let’s continue to use the example in Section 1.2, but with stride=2 and padding=1. There are two changes in this case:</p>
 
-<div class="alert alert-secondary equation">
-	<span>\(\frac{ {\partial L} }{ {\partial {x_{c,i} } } } = \mathop \sum \limits_{k = 1}^{ {N_i} } \frac{ {\partial L} }{ {\partial {y_{c,k} } } }\frac{ {\partial {y_{c,k} } } }{ {\partial {x_{c,i} } } } = \frac{ {\partial L} }{ {\partial {y_{c,{\rm{i} } } } } }\frac{ {\partial {y_{c,{\rm{i} } } } } }{ {\partial {x_{c,i} } } } + \mathop \sum \limits_{k \ne i} \frac{ {\partial L} }{ {\partial {y_{c,k} } } }\frac{ {\partial {y_{c,k} } } }{ {\partial {x_{c,i} } } }\)</span><span class="ref-num">(19)</span>
-</div>
+<ul>
+	<li><strong>Padding=1</strong>: one column or one row is appended to each side of the original input matrix so that both height and width are increased by two, respectively. What does this mean? It means that the top-left corner of the sliding kernel will start from the new top-left corner of the expanded input image and the bottom-right corner will end at the new bottom-right corner of the expanded input image. This allows the kernel to convolve with more patches. Therefore, the size of the new output image is greater than that without padding. </li>
+	<li><strong>Stride=2</strong>: at every step, the kernel will skip the next pixel but directly jump to the 2<sup>nd</sup> next pixel. This means that the kernel will convolve with less patches and the size of the new output image is smaller than that with unit stride.</li>
+</ul>
 
-<p>Based on Equation (5), for \(k = i\), we have</p>
 
-<div class="alert alert-secondary equation">
-	<span>
-		<p><span> \(\frac{ {\partial {y_{c,i} } } }{ {\partial {x_{c,i} } } } = {w_c}\frac{ {\sqrt {\sigma _c^2} \cdot \frac{\partial }{ {\partial {x_{c,i} } } }\left( { {x_{c,i} } - {\mu _c} } \right) - \left( { {x_{c,i} } - {\mu _c} } \right)\frac{\partial }{ {\partial {x_{c,i} } } }\sqrt {\sigma _c^2} } }{ {\sigma _c^2} }\)</span></p>
+<p>Animation in Figure 3 illustrates a convolution for a 3x3 kernel applied to 3 channels of 5x5 inputs with 1x1 zero padding and 2x2 stride to get 1 output channel. </p>
 
-		<p><span> \( = {w_c}\frac{ {\frac{ { {N_i} - 1} }{ { {N_i} } }\sqrt {\sigma _c^2}  - \left( { {x_{c,i} } - {\mu _c} } \right) \cdot\frac{1}{2} \cdot \frac{1}{ {\sqrt {\sigma _c^2} } } \cdot \frac{ {2\left( { {x_{c,i} } - {\mu _c} } \right)} }{ { {N_i} } } } }{ {\sigma _c^2} }\)</span></p>	
+<p align="center">
+ <img src="{{ "/assets/images/Conv2d_1p_2s_3inCh.gif" | relative_url }}" style="border:solid; color:gray" width="500"> 
+<br>Figure 3 Illustration of Conv2d with 3 input channels and 1 output channel in the case of stride=2 and with padding. 
+</p> 
+   
 
-		<span>\( = {w_c}\frac{ {\left( { {N_i} - 1} \right)\sigma _c^2 - { {\left( { {x_{c,i} } - {\mu _c} } \right)}^2} } }{ { {N_i}{ {\sqrt {\sigma _c^2} }^3} } }\)</span>
-	</span>
-	<span class="ref-num">(20)</span>
-</div>
+<p>You might have already noticed that the output height and width are still 3x3, the same as unit-stride and no padding. In general, padding makes the output size bigger and non-unit stride makes it smaller. These two factors happen to cancel out in this particular example, so the image size remains the same. However, they don’t cancel out in most cases. We will discuss the relationship between the input, kernel and output sizes in the next section. </p>
 
-<p>For \(k \ne i\), we have</p>
-
-<div class="alert alert-secondary equation">
-	<span>
-		<p><span> \(\frac{ {\partial {y_{c,k} } } }{ {\partial {x_{c,i} } } } = {w_c}\frac{ {\sqrt {\sigma _c^2} \frac{\partial }{ {\partial {x_{c,i} } } }\left( { {x_{c,k} } - {\mu _c} } \right) - \left( { {x_{c,k} } - {\mu _c} } \right)\frac{\partial }{ {\partial {x_{c,i} } } }\sqrt {\sigma _c^2} } }{ {\sigma _c^2} }\)</span></p>	
-
-		<p><span> \( = {w_c}\frac{ {\sqrt {\sigma _c^2} \left( { - \frac{1}{ { {N_i} } } } \right) - \left( { {x_{c,i} } - {\mu _c} } \right) \cdot \frac{1}{2} \cdot \frac{1}{ {\sqrt {\sigma _c^2} } } \cdot \frac{ {2\left( { {x_{c,i} } - {\mu _c} } \right)} }{ { {N_i} } } } }{ {\sigma _c^2} }\)</span></p>
-
-		<span>\( =  - {w_c}\frac{ {\sigma _c^2 + \left( { {x_{c,i} } - {\mu _c} } \right)\left( { {x_{c,k} } - {\mu _c} } \right)} }{ { {N_i}{ {\sqrt {\sigma _c^2} }^3} } }\)</span>
-	</span>
-	<span class="ref-num">(21)</span>
-</div>
-
-<p>Substitute Equations(20) and (21) into (19), we have</p>
+<h3><a name="_Dimensions"></a>2.	Convolution output size  </h3>
+<h4>2.1.	General equations for output height and width  </h4>
+<p>From the previous section, we have learnt that the output width, \({N_{xOut} }\), depends on the input image width \({N_{xIn} }\), the kernel width \({N_v}\), horizontal padding \({P_x}\) and horizontal stride \({S_x}\). Similarly, the output height, \({N_{yOut} }\), depends on the input image height \({N_{yIn} }\), the kernel height \({N_u}\), vertical padding \({P_y}\) and vertical stride \({S_y}\). If other convolution parameters such as dilation are not considered for simplicity, the relationship can be written as </p>
 
 <div class="alert alert-secondary equation">
 	<span>
-		<p><span> \(\frac{ {\partial L} }{ {\partial {x_{c,i} } } } = \frac{ {\partial L} }{ {\partial {y_{c,{\rm{i} } } } } }{w_c}\frac{ {\left( { {N_i} - 1} \right)\sigma _c^2 - { {\left( { {x_{c,i} } - {\mu _c} } \right)}^2} } }{ { {N_i}{ {\sqrt {\sigma _c^2} }^3} } } - \mathop \sum \limits_{k \ne i} \frac{ {\partial L} }{ {\partial {y_{c,k} } } }{w_c}\frac{ {\sigma _c^2 + \left( { {x_{c,i} } - {\mu _c} } \right)\left( { {x_{c,k} } - {\mu _c} } \right)} }{ { {N_i}{ {\sqrt {\sigma _c^2} }^3} } }\)	</span></p>
+		<p><span> \({N_{xOut} } = floor\left( {\frac{ { {N_{xIn} } + 2{P_x} - {N_v} } }{ { {S_x} } } } \right) + 1\)</span></p>	
 
-		<p><span> \( = \left( {1 - \frac{1}{ { {N_i} } } } \right)\frac{ { {w_c} } }{ {\sqrt {\sigma _c^2} } }\frac{ {\partial L} }{ {\partial {y_{c,{\rm{i} } } } } } - \frac{ { { {\left( { {x_{c,i} } - {\mu _c} } \right)}^2} } }{ { {N_i}{ {\sqrt {\sigma _c^2} }^3} } }\frac{ {\partial L} }{ {\partial {y_{c,{\rm{i} } } } } } - \frac{ { {w_c} } }{ { {N_i}\sqrt {\sigma _c^2} } }\mathop \sum \limits_{k \ne i} \frac{ {\partial L} }{ {\partial {y_{c,k} } } } - \frac{ { {w_c}\left( { {x_{c,i} } - {\mu _c} } \right)} }{ { {N_i}{ {\sqrt {\sigma _c^2} }^3} } }\mathop \sum \limits_{k \ne i} \left( { {x_{c,k} } - {\mu _c} } \right)\frac{ {\partial L} }{ {\partial {y_{c,k} } } }\)	</span></p>
-
-		<p><span> \( = \frac{ { {w_c} } }{ {\sqrt { {\sigma ^2}_c} } }\frac{ {\partial L} }{ {\partial {y_{c,{\rm{i} } } } } } - \frac{ { {w_c} } }{ { {N_i}\sqrt {\sigma _c^2} } }\frac{ {\partial L} }{ {\partial {y_{c,{\rm{i} } } } } } - \frac{ { {w_c}{ {\left( { {x_{c,i} } - {\mu _c} } \right)}^2} } }{ { {N_i}{ {\sqrt {\sigma _c^2} }^3} } }\frac{ {\partial L} }{ {\partial {y_{c,{\rm{i} } } } } } - \frac{ { {w_c} } }{ { {N_i}\sqrt {\sigma _c^2} } }\mathop \sum \limits_{k \ne {\rm{i} } } \frac{ {\partial L} }{ {\partial {y_{c,k} } } } - \frac{ { {w_c}\left( { {x_{c,i} } - {\mu _c} } \right)} }{ { {N_i}{ {\sqrt {\sigma _c^2} }^3} } }\mathop \sum \limits_{k \ne {\rm{i} } } \left( { {x_{c,k} } - {\mu _c} } \right)\frac{ {\partial L} }{ {\partial {y_{c,k} } } }\)	</span></p>
-
-		<p><span> \( = \frac{ { {w_c} } }{ {\sqrt {\sigma _c^2} } }\frac{ {\partial L} }{ {\partial {y_{c,{\rm{i} } } } } } - \frac{ { {w_c} } }{ { {N_i}\sqrt {\sigma _c^2} } }\mathop \sum \limits_{k = 1}^{ {N_i} } \frac{ {\partial L} }{ {\partial {y_{c,k} } } } - \frac{ { {w_c}\left( { {x_{c,i} } - {\mu _c} } \right)} }{ { {N_i}{ {\sqrt {\sigma _c^2} }^3}{w_c} } }\mathop \sum \limits_{k = 1}^{ {N_i} } {w_c}\left( { {x_{c,k} } - {\mu _c} } \right)\frac{ {\partial L} }{ {\partial {y_{c,k} } } }\)	</span></p>
-
-		<span> \( = \frac{ { {w_c} } }{ {\sqrt {\sigma _c^2} } }\frac{ {\partial L} }{ {\partial {y_{c,{\rm{i} } } } } } - \frac{ { {w_c} } }{ { {N_i}\sqrt {\sigma _c^2} } }\mathop \sum \limits_{k = 1}^{ {N_i} } \frac{ {\partial L} }{ {\partial {y_{c,k} } } } - \frac{ { {y_{c,i} } - {\beta _c} } }{ { {N_i}\sqrt {\sigma _c^2} {w_c} } }\mathop \sum \limits_{k = 1}^{ {N_i} } \left( { {y_{c,k} } - {\beta _c} } \right)\frac{ {\partial L} }{ {\partial {y_{c,k} } } }\)</span>
+		<p><span> \({N_{yOut} } = floor\left( {\frac{ { {N_{yIn} } + 2{P_y} - {N_u} } }{ { {S_y} } } } \right) + 1\) </span></p>
 	</span>
-	<span class="ref-num">(22)</span>
-</div>
+	<span class="ref-num">(3)</span>
+</div>	
 
-<h5>2.5.2 Solution 2 for derivation of gradient \(\frac{ {\partial L} }{ {\partial \vec x} }\) </h5>
-<p>Solution 2 is very similar to another very nice post by Kevin Zakka<sup>[<a href="#_Reference3">3</a>]</sup>. From Figure 2 above, we see that, given \({x_{c,i} }\), it has only 3 direct contribution paths to \({y_{c,i} }\), \({\mu _c}\) and \({\sigma ^2}_c\), as highlighted using bold red arrow. Therefore using the chain rule from this perspective, we have the second solution:</P>
 
-<div class="alert alert-secondary equation">
-	<span> \(\frac{ {\partial L} }{ {\partial {x_{c,i} } } } = \frac{ {\partial L} }{ {\partial {y_{c,i} } } }\frac{ {\partial {y_{c,i} } } }{ {\partial {x_{c,i} } } } + \frac{ {\partial L} }{ {\partial {\mu _c} } }\frac{ {\partial {\mu _c} } }{ {\partial {x_{c,i} } } } + \frac{ {\partial L} }{ {\partial \sigma _c^2} }\frac{ {\partial \sigma _c^2} }{ {\partial {x_{c,i} } } }\)</span><span class="ref-num">(23)</span>
-</div>
+<p>Equation (3) indicates that the output size increases with the input size and padding size and decrease with kernel size and stride size. </p>
 
-<p>The 1st item  \(\frac{ {\partial L} }{ {\partial {y_{c,i} } } }\) is the upstream gradient and available from Equation (14). Let’s derive the rest components one by one. </p>
-<p>The 2nd item \(\frac{ {\partial {y_{c,i} } } }{ {\partial {x_{c,i} } } }\) can be derived from Equation (5) </p>
+<p>Let’s apply Equation (3) to the examples in Section 1 for a quick check. For the example of unit stride and no padding, \({N_{xIn} } = 5\),  \({P_x} = 0\), \({N_v} = 3\) and \({S_x} = 1\), so the output size is </p>
 
 <div class="alert alert-secondary equation">
-	<span> \(\frac{ {\partial {y_{c,i} } } }{ {\partial {x_{c,i} } } } = \frac{ { {w_c} } }{ {\sqrt {\sigma _c^2} } }\)</span><span class="ref-num">(24)</span>
+	<span>\({N_{xOut} } = floor\left( {\frac{ {5 + 2 \times 0 - 3} }{1} } \right) + 1 = 3\) </span><span class="ref-num"> (4)</span>
 </div>
 
-<p>Now, let’s derive the 3rd item \(\frac{ {\partial L} }{ {\partial {\mu _c} } }\). Note that, \({\mu _c}\) has direct contribution paths to both \(\vec y\) and \(\sigma _c^2\), so we have </p>
+<p>For the example of padding stride and no padding, \({N_{xIn} } = 5\), \({N_v} = 3\), \({P_x} = 1\) and \({S_x} = 2\), so the output size is </p>
 
 <div class="alert alert-secondary equation">
-<span>
-	<p><span> \(\frac{ {\partial L} }{ {\partial {\mu _c} } } = {\mathop \sum \limits_{k = 1}^{ {N_i} } \frac{ {\partial L} }{ {\partial {y_{c,k} } } }\frac{ {\partial {y_{c,k} } } }{ {\partial {\mu _c} } } } + \frac{ {\partial L} }{ {\partial \sigma _c^2} }\frac{ {\partial \sigma _c^2} }{ {\partial {\mu _c} } }\)</span></p>
-
-	<p><span> \( = {\mathop \sum \limits_{k = 1}^{ {N_i} } \frac{ {\partial L} }{ {\partial {y_{c,k} } } }\frac{ {\partial {y_{c,k} } } }{ {\partial {\mu _c} } } } + \frac{ {\partial L} }{ {\partial \sigma _c^2} }\frac{\partial }{ {\partial {\mu _c} } }\left( {\frac{1}{N}\mathop \sum \limits_{k = 1}^{ {N_i} } { {\left( { {x_k} - {\mu _c} } \right)}^2} } \right)\)</span></p>
-
-	<p><span> \( = { - \mathop \sum \limits_{k = 1}^{ {N_i} } \frac{ {\partial L} }{ {\partial {y_{c,k} } } }\frac{ { {w_c} } }{ {\sqrt {\sigma _c^2} } } } + \frac{ {\partial L} }{ {\partial \sigma _c^2} }\cdot\frac{1}{ { {N_i} } }\mathop \sum \limits_{k = 1}^{ {N_i} } \frac{\partial }{ {\partial {\mu _c} } }{\left( { {x_k} - {\mu _c} } \right)^2}\)</span></p>
-
-	<p><span> \( = { - \frac{ { {w_c} } }{ {\sqrt {\sigma _c^2} } }\mathop \sum \limits_{k = 1}^{ {N_i} } \frac{ {\partial L} }{ {\partial {y_{c,k} } } } } + \frac{ {\partial L} }{ {\partial \sigma _c^2} }\cdot\frac{1}{ { {N_i} } }\mathop \sum \limits_{k = 1}^{ {N_i} } 2\left( { {\mu _c} - {x_k} } \right)\)</span></p>
-
-	<p><span> \( = { - \frac{ { {w_c} } }{ {\sqrt {\sigma _c^2} } }\mathop \sum \limits_{k = 1}^{ {N_i} } \frac{ {\partial L} }{ {\partial {y_{c,k} } } } } + \frac{ {\partial L} }{ {\partial \sigma _c^2} }\cdot2\left( {\frac{1}{ { {N_i} } }\mathop \sum \limits_{k = 1}^{ {N_i} } {\mu _c} - \frac{1}{ { {N_i} } }\mathop \sum \limits_{k = 1}^{ {N_i} } {x_k} } \right)\)</span></p>
-
-	<p><span> \( = { - \frac{ { {w_c} } }{ {\sqrt {\sigma _c^2} } }\mathop \sum \limits_{k = 1}^{ {N_i} } \frac{ {\partial L} }{ {\partial {y_{c,k} } } } } + \frac{ {\partial L} }{ {\partial \sigma _c^2} }\cdot2\left( { {\mu _c} - {\mu _c} } \right)\)</span></p>
-
-	<span> \( = { - \frac{ { {w_c} } }{ {\sqrt {\sigma _c^2} } }\mathop \sum \limits_{k = 1}^{ {N_i} } \frac{ {\partial L} }{ {\partial {y_{c,k} } } } } + 0\)</span>
-	</span>
-	<span class="ref-num">(25)</span>
+	<span>\({N_{xOut} } = floor\left( {\frac{ {5 + 2 \times 1 - 3} }{2} } \right) + 1 = 3\) </span><span class="ref-num"> (5)</span>
 </div>
 
-<p>BTW, from the above derivation, we learned that \(\frac{ {\partial \sigma _c^2} }{ {\partial {\mu _c} } } = 0\).</p>
-<p>Let’s move on to the 4th item \(\frac{ {\partial {\mu _c} } }{ {\partial {x_{c,i} } } }\). Because \({\mu _c} = \frac{1}{ { {N_i} } }\mathop \sum \limits_{i = 1}^{ {N_i} } {x_{c,i} }\), it’s easy to have</p>
+<p>The results happen to be the same for these two particular examples. As mentioned earlier, if the parameters are changed, it can be different. </p>
+
+<h4>2.2.	Special case – half padding  </h4>
+<p>Here is a question: if we want the output size (image height and width) to be the same as the input size, how to achieve it? Equation (3) shows that it has to be unit stride \({S_x} = 1\), otherwise, the output size is guaranteed to be smaller. Under this condition, Equation (3) is reduced to </p>
 
 <div class="alert alert-secondary equation">
-	<span> \(\frac{ {\partial {\mu _c} } }{ {\partial {x_{c,i} } } } = \frac{1}{ { {N_i} } }\)</span><span class="ref-num">(26)</span>
-</div>
+	<span>\({N_{xOut} } = {N_{xIn} } + 2{P_x} - {N_v} + 1\) </span><span class="ref-num"> (6)</span>
+</div>	
 
-<p>Next, for the 5th item \(\frac{ {\partial L} }{ {\partial \sigma _c^2} }\). </p>
-
-<div class="alert alert-secondary equation">
-	<span>
-		<p><span> \(\frac{ {\partial L} }{ {\partial \sigma _c^2} } = \mathop \sum \limits_{k = 1}^{ {N_i} } \frac{ {\partial L} }{ {\partial {y_{c,k} } } }\frac{ {\partial {y_{c,k} } } }{ {\partial \sigma _c^2} }\)</span></p>
-
-		<p><span> \( = \mathop \sum \limits_{k = 1}^{ {N_i} } \frac{ {\partial L} }{ {\partial {y_{c,k} } } }\frac{\partial }{ {\partial \sigma _c^2} }\left( { {w_c}\frac{ { {x_{c,k} } - {\mu _c} } }{ {\sqrt {\sigma _c^2} } } + {\beta _c} } \right)\)</span></p>
-
-		<p><span> \( = \mathop \sum \limits_{k = 1}^{ {N_i} } \frac{ {\partial L} }{ {\partial {y_{c,k} } } }\cdot{w_c}\left( { {x_{c,k} } - {\mu _c} } \right)\frac{\partial }{ {\partial \sigma _c^2} }\left( {\frac{1}{ {\sqrt {\sigma _c^2} } } } \right)\)</span></p>
-
-		<p><span> \( = \mathop \sum \limits_{k = 1}^{ {N_i} } \frac{ {\partial L} }{ {\partial {y_{c,k} } } }\cdot{w_c}\left( { {x_{c,k} } - {\mu _c} } \right)\left( { - \frac{1}{2}\cdot\frac{1}{ { { {\left( {\sqrt {\sigma _c^2} } \right)}^3} } } } \right)\)</span></p>
-
-		<span> \( =  - \frac{1}{2}\mathop \sum \limits_{k = 1}^{ {N_i} } \frac{ {\partial L} }{ {\partial {y_{c,k} } } }\cdot{w_c}\frac{ { {x_{c,k} } - {\mu _c} } }{ { { {\left( {\sqrt {\sigma _c^2} } \right)}^3} } }\)</span>
-	</span>
-	<span class="ref-num">(27)</span>
-</div>
-
-
-<p>For the 6th and also last item \(\frac{ {\partial \sigma _c^2} }{ {\partial {x_{c,i} } } }\), we have</p>
+<p>Set \({N_{xOut} } = {N_{xIn} }\), we have </p>
 
 <div class="alert alert-secondary equation">
-	<span> \(\frac{ {\partial \sigma _c^2} }{ {\partial {x_{c,i} } } } = \frac{\partial }{ {\partial {x_{c,i} } } }\left( {\frac{1}{N}\mathop \sum \limits_{k = 1}^{ {N_i} } { {\left( { {x_{c,k} } - {\mu _c} } \right)}^2} } \right) = \frac{ {2\left( { {x_{c,i} } - {\mu _c} } \right)} }{ { {N_i} } }\)</span><span class="ref-num">(28)</span>
-</div>
+	<span>\({P_x} = \frac{ { {N_v} - 1} }{2}\) </span><span class="ref-num"> (7)</span>
+</div>		
 
-<p>Derivation of Equation (28) used the intermediate result of \(\frac{ {\partial \sigma _c^2} }{ {\partial {\mu _c} } } = 0\) from Equation (25). </p>
-<p>Now, substituting these derivations back into Equation (23), we have</p>
+<p>Because \({P_x}\) must be a integer, \({N_v}\) has to be an odd number. Let's assume the odd number \({N_v} = 2k + 1\), ehere \(k\) is a natural number, then Equation (7) gives padding \({P_x} = k\). Let’s substitute them back into Equation (3), we have the output width </p>
 
 <div class="alert alert-secondary equation">
-	<span>
-		<p><span> \(\frac{ {\partial L} }{ {\partial {x_{c,i} } } } = \frac{ {\partial L} }{ {\partial {y_{c,i} } } }\frac{ {\partial {y_{c,i} } } }{ {\partial {x_{c,i} } } } + \frac{ {\partial L} }{ {\partial {\mu _c} } }\frac{ {\partial {\mu _c} } }{ {\partial {x_{c,i} } } } + \frac{ {\partial L} }{ {\partial \sigma _c^2} }\frac{ {\partial \sigma _c^2} }{ {\partial {x_{c,i} } } }\)</span></p>
+	<span>\({N_{xOut} } = floor\left( {\frac{ { {N_{xIn} } + 2{P_x} - {N_v} } }{ { {S_x} } } } \right) + 1 = floor\left( {\frac{ { {N_{xIn} } + 2k - \left( {2k + 1} \right)} }{1} } \right) + 1 = {N_{xIn} }\) </span><span class="ref-num"> (8)</span>
+</div>	
 
-		<p><span> \( = \frac{ {\partial L} }{ {\partial {y_{c,i} } } }\frac{ { {w_c} } }{ {\sqrt {\sigma _c^2} } } + \left( { - \frac{ { {w_c} } }{ {\sqrt {\sigma _c^2} } }\mathop \sum \limits_{k = 1}^{ {N_i} } \frac{ {\partial L} }{ {\partial {y_{c,k} } } } } \right)\frac{1}{ { {N_i} } } + \left( { - \frac{1}{2}\mathop \sum \limits_{k = 1}^{ {N_i} } \frac{ {\partial L} }{ {\partial {y_{c,k} } } }\cdot{w_c}\frac{ { {x_{c,k} } - {\mu _c} } }{ { { {\left( {\sqrt {\sigma _c^2} } \right)}^3} } } } \right)\cdot\frac{ {2\left( { {x_{c,i} } - {\mu _c} } \right)} }{ { {N_i} } }\)	</span></p>
+<p>This case is known as <strong>half padding</strong>, from which the output size is the same as the input size. For instance, if \({N_{xIn} } = 5\), \({N_v} = 3\),  \({P_x} = \frac{ {\left( { {N_v} - 1} \right)} }{2} = 1\), unit stride \({S_x} = 1\), then the output size is </p>
 
-		<p><span> \( = \frac{ { {w_c} } }{ {\sqrt {\sigma _c^2} } }\frac{ {\partial L} }{ {\partial {y_{c,i} } } } - \frac{ { {w_c} } }{ { {N_i}\sqrt {\sigma _c^2} } }\mathop \sum \limits_{k = 1}^{ {N_i} } \frac{ {\partial L} }{ {\partial {y_{c,k} } } } - \left( {\frac{1}{ { {N_i}\sqrt {\sigma _c^2} } }\frac{ { {x_{c,i} } - {\mu _c} } }{ {\sqrt {\sigma _c^2} } }\mathop \sum \limits_{k = 1}^{ {N_i} } \left( {\frac{ {\partial L} }{ {\partial {y_{c,k} } } }\cdot{w_c}\frac{ { {x_{c,k} } - {\mu _c} } }{ {\sqrt {\sigma _c^2} } } } \right)} \right)\)</span></p>
+<div class="alert alert-secondary equation">
+	<span>\({N_{xOut} } = floor\left( {\frac{ {5 + 2 \times 1 - 3} }{1} } \right) + 1 = 5 = {N_{xIn} }\) </span><span class="ref-num"> (9)</span>
+</div>	
 
-		<p><span> \( = \frac{ { {w_c} } }{ {\sqrt {\sigma _c^2} } }\frac{ {\partial L} }{ {\partial {y_{c,i} } } } - \frac{ { {w_c} } }{ { {N_i}\sqrt {\sigma _c^2} } }\mathop \sum \limits_{k = 1}^{ {N_i} } \frac{ {\partial L} }{ {\partial {y_{c,k} } } } - \left( {\frac{1}{ { {N_i}\sqrt {\sigma _c^2} } }\cdot\frac{ { {w_c} } }{ { {w_c} } }\cdot\frac{ { {x_{c,i} } - {\mu _c} } }{ {\sqrt {\sigma _c^2} } }\mathop \sum \limits_{k = 1}^{ {N_i} } \left( {\frac{ {\partial L} }{ {\partial {y_{c,k} } } }\cdot{w_c}\frac{ { {x_{c,k} } - {\mu _c} } }{ {\sqrt {\sigma _c^2} } } } \right)} \right)\)	</span></p>
+<p>The same relationship applies to the height dimension as well. </p>
 
-		<p><span> \( = \frac{ { {w_c} } }{ {\sqrt {\sigma _c^2} } }\frac{ {\partial L} }{ {\partial {y_{c,i} } } } - \frac{ { {w_c} } }{ { {N_i}\sqrt {\sigma _c^2} } }\mathop \sum \limits_{k = 1}^{ {N_i} } \frac{ {\partial L} }{ {\partial {y_{c,k} } } } - \left( {\frac{ { {y_{c,i} } - {\beta _c} } }{ { {N_i}{w_c}\sqrt {\sigma _c^2} } }\mathop \sum \limits_{k = 1}^{ {N_i} } \left( {\frac{ {\partial L} }{ {\partial {y_{c,k} } } }\cdot\left( { {y_{c,k} } - {\beta _c} } \right)} \right)} \right)\)</span></p>
+<p>Equation (6) means that the image size of a half padding convolution remains the same. Keeping this in mind is helpful during network design if the same size is desired:</p>
 
-		<span> \( = \frac{ { {w_c} } }{ {\sqrt {\sigma _c^2} } }\frac{ {\partial L} }{ {\partial {y_{c,i} } } } - \frac{ { {w_c} } }{ { {N_i}\sqrt {\sigma _c^2} } }\mathop \sum \limits_{k = 1}^{ {N_i} } \frac{ {\partial L} }{ {\partial {y_{c,k} } } } - \frac{ { {y_{c,i} } - {\beta _c} } }{ { {N_i}{w_c}\sqrt {\sigma _c^2} } }\mathop \sum \limits_{k = 1}^{ {N_i} } \left( { {y_{c,k} } - {\beta _c} } \right)\frac{ {\partial L} }{ {\partial {y_{c,k} } } }\)</span>
-	</span>
-	<span class="ref-num">(29)</span>
-</div>
-
-<p>Equation (29) is identical to Equation (22): two solutions, the same answer. We took this effort to demonstrate that a problem can be solved using different solutions. Derivation is done! </p>
-
-<h3><a name="_Custom_implementations_and_validation"></a>3. Custom implementations and validation  </h3>
-<p>Two separate implementations of the forward pass, loss calculation, and backpropagation are demonstrated in this post. The 1st one uses PyTorch and the 2nd one uses Numpy. The functions and corresponding equations are summarized in Table below. </p>
-
-<table>
-  <tr>
-    <th>Functions</th>
-    <th>Equations</th>
-  </tr>
-  <tr>
-    <td>BatchNorm Forward</td>
-    <td>(5)</td>
-  </tr>
-  <tr>
-    <td>Sigmoid Forward</td>
-    <td>(8)</td>
-  </tr>
-  <tr>
-    <td>MSE Loss</td>
-    <td>(9)</td>
-  </tr>
-  <tr>
-    <td>MSE Gradient</td>
-    <td>(12)</td>
-  </tr>
-  <tr>
-    <td>Sigmoid Gradient</td>
-    <td>(14)</td>
-  </tr>
-  <tr>
-    <td>BatchNorm Gradients</td>
-    <td>(16), (18), (22)</td>
-  </tr>
-</table>
-
-<p>While the Numpy version is quite self-explanatory, it is worth mentioning that the PyTorch version of our custom autograd functions of BatchNorm, Sigmoid and MSELoss are implemented by subclassing torch.autograd.Function, respectively. The forward() and backward() functions are overridden based on the equations above and will be executed when the forward pass and backpropagation are triggered. Please also note that the input list of upstream gradients of the backward() function must match the output list of the forward() function, and the output gradient list of the backward() function must match the input list of the forward() function. In addition, the input, output and intermediate data of the forward() function can be cached using the save_for_backward() function so that they can be used in the backward() function without re-calculation.  </p>
-
-<p>A small constant number \(\epsilon = 1E-5\) is added to \(\sigma _c^2\) in order to avoid divide-by-zero exception just in case, just as done by the PyTorch built-in BatchNorm. </p>
-
-<p>To serve as a reference for comparison, the same network was also implemented using PyTorch’s built-in modules of BatchNorm<sup>[<a href="#_Reference4">4</a>]</sup>, Sigmoid and MSELoss. The network output, loss, gradients of the loss w.r.t. \(\vec w\), \(\vec \beta \) and \(\vec x\) from the custom implementations were compared to the reference and the results matched. </p>
-
-<p>You can find <a href="https://github.com/coolgpu/backpropagation_w_example/blob/master/src/batchnorm_sigmoid_mse_network.py">the source code on GitHub</a>. If you like, you can also implement using Tensorflow as well to gain hands-on experience. </p> 
+<ul>
+	<li>Use unit stride \({S_x} = 1\) and \({S_y} = 1\) </li>
+	<li>Use odd number of kernel size \({N_u}\) and \({N_v}\)</li>
+	<li>Use padding with \({P_u} = \frac{ { {N_u} - 1} }{2}\) and \({P_v} = \frac{ { {N_v} - 1} }{2}\)</li>
+</ul>
 
 
-<h3><a name="_Summary"></a>4. Summary </h3>
-<p>In this post, we used a simple BatchNorm-Sigmoid-MSELoss network to demonstrate how to use the chain rule to derive gradients in backpropagation and how to implement the custom autograd functions. We hope that, by going over this example, it can help obtain a deeper understanding of the fundamentals of neural networks, especially about backpropagation. </p>
+<h4>2.3.	Special case – full padding  </h4>
+<p>Full padding refers to the case where padding is one smaller than the kernel size \({P_x} = {N_v} - 1\) and unit stride \({S_x} = 1\). Based on Equation (3) the output width is </p>
 
-<h3><a name="_Extra"></a>5. Extra</h3> 
-<p>In the derivation above we found that the partial derivatives of the biased variance \({\sigma ^2}\) w.r.t to the input \(\vec x\) and mean \(\mu \) are \(\frac{ {\partial {\sigma ^2} } }{ {\partial {x_i} } } = \frac{ {2\left( { {x_i} - \mu } \right)} }{N}\) and \(\frac{ {\partial {\sigma ^2} } }{ {\partial \mu } } = 0\), respectively. If it sounds a little bit surprising to see these results and especially \(\frac{ {\partial {\sigma ^2} } }{ {\partial \mu } } = 0\), you can write a few lines of Python codes to verify it, just as below.</p>
+<div class="alert alert-secondary equation">
+	<span>\({N_{xOut} } = floor\left( {\frac{ { {N_{xIn} } + 2{P_x} - {N_v} } }{ { {S_x} } } } \right) + 1 = floor\left( {\frac{ { {N_{xIn} } + 2\left( { {N_v} - 1} \right) - {N_v} } }{1} } \right) + 1 = {N_{xIn} } + {N_v} - 1\) </span><span class="ref-num"> (10)</span>
+</div>	
+
+<p>Because \({N_v}\) is greater than 1, the output size \({N_{xOut} }\) is also greater than the input size \({N_{xIn} }\). </p>
+
+<p>In general, if padding is small than the half padding, the output size is smaller than the input size. If padding is greater than the half padding, the output size is bigger than the input size. For half padding, the size remains the same. </p>
+
+<h3><a name="_Implementation2"></a>3.	Implementation #1 of Conv2d forward and backward   </h3>
+<p>In order to gain hands-on experience and full understanding of Conv2d, we implemented two versions of the Conv2d, both by subclassing torch.autograd.Function and manually overriding the forward and backward methods. The 1<sup>st</sup> version is kind of collection of multiple small modules including unfold, matrix multiplication, fold, etc. The 2<sup>nd</sup> version is more like brute force implementation of the equations using nested for loops. </p>
+
+<p>To validate our custom implementations, we build a small Conv2d-LeakyReLU-Mean network and compared the outputs and autograd results with the Torch built-in implementation. The LeakyReLU layer is also custom implemented. </p>
+
+<p>This section covers Version #1 and the compete source code can be found on GitHub (<a href="https://github.com/coolgpu/Demo_Conv2d_forward_and_backward/blob/master/my_conv2d_v1.py">my_conv2d_v1.py</a>). </p>
+
+<h4>3.1.	Forward in Version #1 </h4>
+<p>This implementation is inspired by the discussion of using unfold function <a href="https://discuss.pytorch.org/t/custom-convolution-dot-product/14992/3">here</a>. The forward function is overridden to take 5 input arguments: </p>
+<ul>
+	<li><strong>ctx</strong>: represent THIS instance of the class </li>
+	<li><strong>inX</strong>: the 4-D input tensor with a shape of (nImgSamples, nInCh, nInImgRows, nInImgCols)</li>
+	<li><strong>in_weight</strong>: the 4-D learnable convolution kernel with a shape of (nOutCh, nInCh, nKnRows, nKnCols)</li>
+	<li> <strong>in_bias</strong>: 1-D learnable convolution bias with a shape of (nOutCh,) </li>
+	<li> <strong>convparam</strong>: tuple to pass in parameters of (padding, stride), default=(0,1) </li>
+</ul>
+
+
+<p>The core part is listed below. For the convenience of tracking and readability, the name of each variable is a combination of its meaning and dimensions to indicate the shape of the tensor. </p>
+
 <pre class="pre-scrollable">
 	<code class="python">
-		import torch
-		
-		x = torch.rand(10, requires_grad=True, dtype=torch.float64)
-		m = x.mean()
-		m.retain_grad()
-		v = ((x-m)**2).sum()/x.numel()
-		v.backward()
-		manual_grad_dvdx = (x-m)*2/x.numel()
-		print('dv/dm  = ', m.grad)
-		print('torch  dv/dx= ', x.grad.detach().numpy())
-		print('manual dv/dx= ', manual_grad_dvdx.detach().numpy())
+1.   inX_nSamp_nB_nL = torch.nn.functional.unfold(inX, (nKnRows, nKnCols), padding=padding, stride=stride)
+2.   inX_nSamp_nL_nB = inX_nSamp_nB_nL.transpose(1, 2)
+3.   kn_nOutCh_nB = in_weight.view(nOutCh, -1)
+4.   kn_nB_nOutCh = kn_nOutCh_nB.t()
+5.   out_nSamp_nL_nOutCh = inX_nSamp_nL_nB.matmul(kn_nB_nOutCh)
+6.   out_nSamp_nOutCh_nL = out_nSamp_nL_nOutCh.transpose(1, 2)
+7.   out = out_nSamp_nOutCh_nL.reshape(nImgSamples, nOutCh, nOutRows, nOutCols)
+8.   if in_bias is not None:
+9.      out += in_bias.view(1, -1, 1, 1)
 	</code>
 </pre>
 
-<h3><a name="_References"></a>6. References</h3> 
+
+<p>Line 1: call the unfold function to extract nOutRows x nOutCols patches per sample from the input and each patch has a size of inChannels x nKnRows x nKnCols elements and can be multiplied with the convolution kernels. The input tensor has a shape of (nImgSamples, nInCh, nInImgRows, nInImgCols) and the unfold output tensor has a shape of (nImgSamples, nB=inChannels x nKnRows x nKnCols, nL=nOutRows X nOutCols). </p>
+
+<p>Line 2-4: reshape the unfolded data and kernel to so that the last dimension of inX_nSamp_nL_nB and the first dimension of kn_nB_nOutCh have the same size (nB) for matrix multiplication. </p>
+
+<p>Line 5: Apply matrix multiplication. </p>
+
+<p>Line 6-7: Reshape the result to match the output shape. </p>
+
+<p>Line 8: Add the bias, if specified, to obtain the final output from MyConv2d. </p>
+
+<p>It returns a 4-D tensor of the convolution results with a shape of (nImgSamples, nOutCh, nOutRows, nOutCols). </p>
+
+<h4>3.2. Backward in Version #1</h4>
+<p>The backward function is overridden to take one argument (in addition to THIS instance ctx), which must match the output list of the forward function:
+•	grad_from_upstream: the 4-D tensor of the upstream gradient for the convolution. It has the same shape as the forward output, (nImgSamples, nOutCh, nOutRows, nOutCols) 
+
+<p>The backward function must return the same number of items as the argument list of the forward function, not including ctx. More specifically, it must return 3 gradients of the loss w.r.t. to inX, in_weight and in_bias (if specified, otherwise a None) respectively, plus a None for convparam that is just a tuple of parameters and does not require gradient. </p>
+
+<p>Please see the <a href="https://github.com/coolgpu/Demo_Conv2d_forward_and_backward/blob/master/my_conv2d_v1.py">source code</a> for detailed implementation and it is quite self-explanatory with comments above each step. In fact, it starts from the upstreaming gradient, using the chain rule as discussed in the <a href="https://coolgpu.github.io/coolgpu_blog/github/pages/2020/09/14/backpropagation.html#_Derivation_of_the_gradients"> previous posts</a>, and computes the gradients of each step of the forward function in reversed order. </p>
+
+<p>It is worth mentioning that, because inX_nSamp_nL_nB and kn_nB_nOutCh are involved in matrix multiplication, we used the conclusion from the <a href="https://coolgpu.github.io/coolgpu_blog/github/pages/2020/09/22/matrixmultiplication.html#_Summary">previous post</a> to calculate their gradients: </p>
+
+
+<div class="alert alert-secondary equation">
+	<span>\(\frac{ {\partial L} }{ {\partial \boldsymbol {A} } } = \frac{ {\partial L} }{ {\partial \boldsymbol {C} } }{\boldsymbol {B} ^T}\) and \(\frac{ {\partial L} }{ {\partial \boldsymbol {B} } } = {\boldsymbol {A} ^T}\frac{ {\partial L} }{ {\partial \boldsymbol {C} } }\) </span><span class="ref-num"> (11)</span>
+</div>
+
+<p>for the matrix multiplication of \( \boldsymbol {C} = \boldsymbol {A} \boldsymbol {B} \). </p>
+
+<p>Another thing to note is that the fold function is called, like a counterpart of the unfold function used in the forward function, to sum and patch the intermediate gradient data grad_inX_nSamp_nB_nL back into the shape of inX, (nImgSamples, nInCh, nInImgRows, nInImgCols). </p>
+
+<h3><a name="_Implementation2"></a>4.	 Implementation #2 of Conv2d forward and backward </h3>  
+<p>The 2<sup>nd</sup> version of implementation of Conv2d has the same interfaces of the forward and backward function when subclassing torch.autograd.Function. Different from the 1<sup>st</sup> version that is a collection of multiple steps, the 2<sup>nd</sup> version directly implements the equations (1) and (2) using 3 nested for loop. Please see the complete source code of this implementation (<a href="https://github.com/coolgpu/Demo_Conv2d_forward_and_backward/blob/master/my_conv2d_v2.py">my_conv2d_v2.py</a>) on GitHub. </p>
+
+<h4>4.1. Forward in Version #2 </h4>
+<p>The core part is listed below. For convenience of calculation, the input tensor inX is padded to a new bigger tensor paddedX. Inside the center of the 3 nested for loops, it is the element-wise multiplication of the input patch with the kernel, followed by the sum, which is exactly implementation of Equation (1). </p>
+
+<pre class="pre-scrollable">
+	<code class="python">
+paddedX[:,:,padding:nInImgRows+padding,padding:nInImgCols+padding] = inX 
+
+for outCh in range(nOutCh):
+   for iRow in range(nOutRows):
+      startRow = iRow * stride 
+
+      for iCol in range(nOutCols):
+         startCol = iCol * stride 
+
+         out[:, outCh, iRow, iCol] = \                
+            (paddedX[:,:,startRow:startRow+nKnRows,startCol:startCol+nKnCols] \
+            * in_weight[outCh,:,0:nKnRows,0:nKnCols]).sum(axis=(1,2,3))
+	</code>
+</pre>
+
+
+<p>Similarly to the 1<sup>st</sup> version, it returns a 4-D tensor of the convolution results with a shape of (nImgSamples, nOutCh, nOutRows, nOutCols). </p>
+
+<h4>4.2. Backward in Version #2</h4>
+<p>Again, the backward function must return 3 gradients of the loss w.r.t. to inX, in_weight and in_bias (if specified, otherwise a None) respectively, plus a None for convparam that is just a tuple of parameters and does not require gradient. </p>
+
+<p>It uses the same 3 nested for loops to compute the gradients and the core part is listed below. Inside the center of the loops, it also follows the two key ideas of the backpropagation chain rule: 1) summation of all paths and 2) product of upstream and local gradients along each path. Pleate note that, in calculation of the gradients of the kernel (grad_weight), the results are summed with sum(axis=0) because the kernel is applied to all samples, which is the 1<sup>st</sup> dimension (axis=0). The same logic applies to grad_bias too. </p>
+
+<pre class="pre-scrollable">
+	<code class="python">
+for outCh in range(nOutCh):
+   for iRow in range(nOutRows):
+      startRow = iRow * stride 
+
+         for iCol in range(nOutCols):
+            startCol = iCol * stride 
+
+            grad_padX[:,:,startRow:startRow+nKnRows,startCol:startCol+nKnCols] += \
+               grad_from_upstream[:, outCh, iRow, iCol].reshape(-1, 1, 1, 1) * \
+               in_weight[outCh, :, 0:nKnRows, 0:nKnCols]
+
+            grad_weight[outCh, :, 0:nKnRows, 0:nKnCols] += \
+               (paddedX[:,:,startRow:startRow+nKnRows,startCol:startCol+nKnCols] * \
+               grad_from_upstream[:, outCh, iRow, iCol].reshape(-1, 1, 1, 1)).sum(axis=0)
+
+grad_inputX = grad_padX[:,:,padding:nPadImgRows-padding,padding:nPadImgCols-padding]
+
+if in_bias is not None:
+   grad_bias = grad_from_upstream.sum(axis=(0, 2, 3))
+	</code>
+</pre>
+
+  
+
+<h3><a name="_Validation"></a>5. Validation against Torch built-ins   </h3>
+<p>To validate our custom implementations, we build a small <strong>Conv2d-LeakyReLU-Mean</strong> network (Figure 4) and compared the outputs and autograd results with the Torch built-in implementation<sup>[<a href="#_Reference1">1</a>]</sup>. The LeakyReLU layer is also custom implemented and <a href="https://github.com/coolgpu/Demo_Conv2d_forward_and_backward/blob/master/myLeakyReLU.py">the source code can be found here</a>. The validation code can be found <a href="https://github.com/coolgpu/Demo_Conv2d_forward_and_backward/blob/master/Test_my_conv2d_leakyReLU_forward_backward.py">here</a>. Results show that both implementations of Conv2d produced the same results as the Torch built-ins, including the output and the gradients w.r.t. the input, kernel and bias. </p>
+
+<p align="center">
+ <img src="{{ "/assets/images/Conv2d_LeakyReLU_Mean_network.png" | relative_url }}" style="border:solid; color:gray" width="350"> 
+<br>Figure 4 Illustration of Conv2d-LeakyReLU-Mean network used for validation. 
+</p> 
+    
+
+<h3><a name="_Summary"></a>6. Summary </h3> 
+<p>In this post, we discussed the fundamentals of Conv2d and demonstrated how to implement its forward and backward autograd functions using 2 different ways. In the end, we built a simple BatchNorm-Sigmoid-MSELoss network to test our implementations. While we used Conv2d as the example, all ideas can be extended to Conv1d and Conv3d. We hope that, by going through this example, it can help us obtain a deeper understanding of the convolution in neural networks. In next post, we will move to ConvTranpose. </p>
+
+<h3><a name="_Extra"></a>7.	Extra – Edge detection and Smoothing using pre-defined kernels</h3>
+<p>While the convolution kernel and bias are learnable parameters in convolutional neural networks, standalone Conv2d can also be used to perform specific tasks using pre-defined kernels. In this section, we would like to demonstrate two applications of Conv2d: edge detection and smoothing. In both examples, we use the same input image as shown in Figure 5. </p>
+
+<p align="center">
+ <img src="{{ "/assets/images/Conv2d_leaf_original.png" | relative_url }}" style="border:solid; color:gray" width="350"> 
+<br>Figure 5 The original image of leaves. 
+</p> 
+   
+
+<h4>7.1.	Sobel edge detection using Conv2d</h4>
+<p>Sobel filter<sup>[<a href="#_Reference2">2</a>]</sup> is used in the edge detection example. Two 3x3 Sobel kernels are given by </p>
+
+
+<div class="alert alert-secondary equation">
+	<span>\(  \boldsymbol {K_1} = \left[ {\begin{array}{*{20}{c} }1&0&{ - 1}\\2&0&{ - 2}\\1&0&{ - 1}\end{array} } \right]\)  and \(  \boldsymbol {K_2} = \left[ {\begin{array}{*{20}{c} }1&2&1\\0&0&0\\{ - 1}&{ - 2}&{ - 1}\end{array} } \right]\) </span><span class="ref-num"> (12)</span>
+</div>	
+
+
+<p>For a given 2-D input image \( \boldsymbol {I} \), the Sobel edge detection output image \( \boldsymbol {O} \) is given by </p>
+
+<div class="alert alert-secondary equation">
+	<span>\( \boldsymbol {O}  = \sqrt { { {\left( { \boldsymbol {I}  \otimes  \boldsymbol {K_1} } \right)}^2} + { {\left( { \boldsymbol {I}  \otimes  \boldsymbol {K_2} } \right)}^2} } \) </span><span class="ref-num"> (13)</span>
+</div>		
+
+<p>The source code can be found <a href="https://github.com/coolgpu/Demo_Conv2d_forward_and_backward/blob/master/Conv2d_Extra.py">here</a> and the output image is shown in Figure 6. </p>
+
+<p align="center">
+ <img src="{{ "/assets/images/Conv2d_leaf_sobel_edge_out.png" | relative_url }}" style="border:solid; color:gray" width="350"> 
+<br>Figure 6 The Sobel edge detection output image. 
+</p> 
+
+
+<h4>7.2.	Gaussian blurring using Conv2d</h4>
+<p>A normalized 5x5 Gaussian kernel is given by </p>
+
+<div class="alert alert-secondary equation">
+	<span>\( \boldsymbol {G}  = \left[ {\begin{array}{*{20}{c} }{0.003765}&{0.015019}&{0.023792}&{0.015019}&{0.003765}\\{0.015019}&{0.059912}&{0.094907}&{0.059912}&{0.015019}\\{0.023792}&{0.094907}&{0.150342}&{0.094907}&{0.023792}\\{0.015019}&{0.059912}&{0.094907}&{0.059912}&{0.015019}\\{0.003765}&{0.015019}&{0.023792}&{0.015019}&{0.003765}\end{array} } \right]\) </span><span class="ref-num"> (14)</span>
+</div>	
+
+
+<p>For a given 2-D input image \( \boldsymbol {I} \), the Gaussian blurred output image \( \boldsymbol {O} \) is given by </p>
+
+<div class="alert alert-secondary equation">
+	<span>\( \boldsymbol {O}  =  \boldsymbol {I}  \otimes  \boldsymbol {G} \) </span><span class="ref-num"> (15)</span>
+</div>		
+
+<p>The source code can be found <a href="https://github.com/coolgpu/Demo_Conv2d_forward_and_backward/blob/master/Conv2d_Extra.py">here</a> and the blurred output image is shown in Figure 7. </p>
+
+<p align="center">
+ <img src="{{ "/assets/images/Conv2d_leaf_gaussian_blur_out.png" | relative_url }}" style="border:solid; color:gray" width="350"> 
+<br>Figure 7 The the Gaussian blurred output image.
+</p> 
+
+
+
+<h3><a name="_References"></a>8. References</h3> 
 <ul>
-	<li><a name="_Reference1"></a>[1] Diederik P. Kingma and Jimmy Lei Ba (2014). <a href="https://arxiv.org/abs/1412.6980">Adam : A method for stochastic optimization.</a></li>
-	<li><a name="_Reference2"></a>[2] Sergey Ioffe and Christian Szegedy (2015). <a href="https://arxiv.org/abs/1502.03167">Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift.</a></li>
-	<li><a name="_Reference3"></a>[3] Kevin Zakka (2016). <a href="https://kevinzakka.github.io/2016/09/14/batch_normalization/">Deriving the Gradient for the Backward Pass of Batch Normalization.</a></li>
-	<li><a name="_Reference4"></a>[4] PyTorch documentation. <a href="https://pytorch.org/docs/stable/generated/torch.nn.BatchNorm3d.html">BatchNorm3d.</a></li>	
+	<li><a name="_Reference1"></a>[1] <a href="https://pytorch.org/docs/stable/generated/torch.nn.Conv2d.html"> Conv2d - PyTorch documentation. </a></li>
+	<li><a name="_Reference2"></a>[2] <a href="https://en.wikipedia.org/wiki/Sobel_operator"> Sobel operator on Wikipedia. </a></li>
 </ul>
 
 <br>
@@ -397,4 +395,3 @@ if(!window.hcb_user){hcb_user={};}
 	s.setAttribute("src", h+"/jread?page="+encodeURIComponent(l).replace("+","%2B")+"&opts=16862&num=10&ts=1599873842684");
 	if (typeof s!="undefined") document.getElementsByTagName("head")[0].appendChild(s);})(); 
 </script>
-
