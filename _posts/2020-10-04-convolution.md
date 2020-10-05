@@ -7,7 +7,7 @@ categories: github pages
 author: Xiyun Song
 ---
 
-<p>In the last post, we discussed matrix multiplication and derivation of its gradients. In this post, we will talk about convolution, the 2<sup>nd</sup> part of the series. </p>
+<p>In the previous post, we discussed matrix multiplication and derivation of its gradients. In this post, we will talk about convolution, the 2<sup>nd</sup> part of the series. </p>
 
 
 <ul>
@@ -42,7 +42,7 @@ author: Xiyun Song
 </ul>
 
 
-<h4>1.1.	Basic Conv2d with unit stride and no padding  </h4>
+<h4>1.1. Basic Conv2d with unit stride and no padding  </h4>
 <p>We will start with the simplest case: Stride=1 and no padding. Given an input image \(\boldsymbol {I}\left( {y,x} \right)\) with an image size of \(\left( { {N_y},{N_x} } \right)\) and a sliding kernel \( \boldsymbol {K} \left( {u,v} \right)\) with \({N_u}\) rows and \({N_v}\) columns, the output, \( \boldsymbol {O} \), of the convolution between \( \boldsymbol {I} \) and \( \boldsymbol {K} \) can be defined as </p>
 
 
@@ -52,7 +52,7 @@ author: Xiyun Song
  
 <p>Where \( \otimes \) denotes the "convolution" operation, \(u\) and \(v\) are the indices of the rows and columns of the kernel, respectively. </p>
 
-<p>Looking at Equation (1), you might have a question: “Wait! Isn’t this a correlation, not a convolution?” Very good! You are right. It is cross-correlation, not a convolution defined in math that requires a flip of the kernel before the product. If the kernel is not symmetric both in horizontal and vertical directions, the results of cross-correction and convolution from the same input image \( \boldsymbol {I} \) and kernel \( \boldsymbol {K} \) will be different. However, in neural networks, the elements in the kernel are trainable parameters, which means that their values come from training.  Either flip or not flip, you still get the same values except their locations in the kernel are flipped, so it really doesn’t matter. Therefore, the terminology “convolution” is used for the cross-correlation in neural networks. </p>
+<p>Looking at Equation (1), you might have a question: “Wait! Isn’t this a correlation, not a convolution?” Very good! You are right. It is cross-correlation, not a convolution defined in math that requires a flip of the kernel before the product. If the kernel is not symmetric both in horizontal and vertical directions, the results of cross-correction and convolution from the same input image \( \boldsymbol {I} \) and kernel \( \boldsymbol {K} \) will be different. However, in neural networks, the elements in the kernel are learnable parameters, which means that their values come from training.  Either flip or not flip, you still get the same values except their locations in the kernel are flipped, so it really doesn’t matter. Therefore, the terminology “convolution” is used for the cross-correlation in neural networks. </p>
 
 <p>Pictures tells better stories. Animation in Figure 1 illustrates a convolution for a 3x3 kernel applied to a 5x5 input to get a 3x3 output. </p>
 
@@ -70,7 +70,7 @@ author: Xiyun Song
 </ul>
 
 
-<h4>1.2.	Multiple feature channel Conv2d with unit stride and no padding  </h4>
+<h4>1.2. Multiple feature channel Conv2d with unit stride and no padding  </h4>
 <p>The basic convolution discussed in Section 1.1 can be thought of as the case where the input image has only one feature channel. In real deep learning networks, the number of feature channels of the input and output images of a convolution layer can be any (reasonable) positive integer, for example, 1, 3, 8, etc., depending on specific tasks, how deep and how wide the network would be, and how much hardware resource available, etc. In the case of multi-data and multi-channels, let’s consider a Conv2d with data presented as tensors: a 4-D filter kernel tensor \( \boldsymbol {K} \left( { {N_{outCh} },{N_{inCh} },{N_u},{N_v} } \right)\), a 4-D input tensor \( \boldsymbol {I} \left( { {N_s},{N_{inCh} },{H_{in} },{W_{in} } } \right)\) and a 4-D output tensor \( \boldsymbol {O} \left( { {N_s},{N_{outCh} },{H_{out} },{W_{out} } } \right)\). The \({c_{out} }\)-th output channel result of the \(n\)-th sample, labeled as \( \boldsymbol {O} \left( {n,{c_{out} },*,*} \right)\), can be described by </p>
 
 <div class="alert alert-secondary equation">
@@ -85,11 +85,11 @@ author: Xiyun Song
 
 <p align="center">
  <img src="{{ "/assets/images/Conv2d_0p_1s_3inCh.gif" | relative_url }}" style="border:solid; color:gray" width="600"> 
-<br>Figure 2 Illustration of Conv2d with 3 input channels and 1 output channel in the case of unit stride and no padding. 
+<br>Figure 2 Illustration of a Conv2d with 3 channels of 5x5 input, 1 channel 3x3 output, unit stride and no padding. 
 </p> 
 
 
-<h4>1.3.	Multiple feature channel Conv2d with non-unit stride and padding  </h4>
+<h4>1.3. Multiple feature channel Conv2d with non-unit stride and padding  </h4>
 <p>The situation gets a little more complex when both non-unit stride and padding are involved in convolution. However, the analysis is still the same. Let’s continue to use the example in Section 1.2, but with stride=2 and padding=1. There are two changes in this case:</p>
 
 <ul>
@@ -195,7 +195,7 @@ author: Xiyun Song
 
 
 <h3><a name="_Implementation2"></a>3. Implementation #1 of Conv2d forward and backward   </h3>
-<p>In order to gain hands-on experience and full understanding of Conv2d, we implemented two versions of the Conv2d, both by subclassing torch.autograd.Function and manually overriding the forward and backward methods. The 1<sup>st</sup> version is kind of collection of multiple small modules including unfold, matrix multiplication, fold, etc. The 2<sup>nd</sup> version is more like brute force implementation of the equations using nested for loops. </p>
+<p>In order to gain hands-on experience and full understanding of Conv2d, we implemented two versions of the Conv2d, both by subclassing torch.autograd.Function and manually overriding the forward and backward methods. The 1<sup>st</sup> version is kind of collection of multiple small modules including unfold, matrix multiplication, fold, etc. The 2<sup>nd</sup> version is more like brute force implementation of the equations using nested <i>for</i> loops. </p>
 
 <p>To validate our custom implementations, we build a small <i>Conv2d-LeakyReLU-Mean</i> network and compared the outputs and autograd results with the Torch built-in implementation. The <i>LeakyReLU</i> layer is also custom implemented. </p>
 
@@ -265,10 +265,10 @@ author: Xiyun Song
 
 
 <h3><a name="_Implementation2"></a>4. Implementation #2 of Conv2d forward and backward </h3>  
-<p>The 2<sup>nd</sup> version of implementation of Conv2d has the same interfaces of the forward and backward function when subclassing torch.autograd.Function. Different from the 1<sup>st</sup> version that is a collection of multiple steps, the 2<sup>nd</sup> version directly implements the equations (1) and (2) using 3 nested for loop. Please see the complete source code of this implementation (<a href="https://github.com/coolgpu/Demo_Conv2d_forward_and_backward/blob/master/my_conv2d_v2.py">my_conv2d_v2.py</a>) on GitHub. </p>
+<p>The 2<sup>nd</sup> version of implementation of Conv2d has the same interfaces of the forward and backward function when subclassing torch.autograd.Function. Different from the 1<sup>st</sup> version that is a collection of multiple steps, the 2<sup>nd</sup> version directly implements the equations (1) and (2) using 3 nested <i>for</i> loops. Please see the complete source code of this implementation (<a href="https://github.com/coolgpu/Demo_Conv2d_forward_and_backward/blob/master/my_conv2d_v2.py">my_conv2d_v2.py</a>) on GitHub. </p>
 
 <h4>4.1. Forward in Version #2 </h4>
-<p>The core part is listed below. For convenience of calculation, the input tensor inX is padded to a new bigger tensor paddedX. Inside the center of the 3 nested for loops, it is the element-wise multiplication of the input patch with the kernel, followed by the sum, which is exactly implementation of Equation (1). </p>
+<p>The core part is listed below. For convenience of calculation, the input tensor inX is padded to a new bigger tensor paddedX. Inside the center of the 3 nested <i>for</i> loops, it is the element-wise multiplication of the input patch with the kernel, followed by the sum, which is exactly implementation of Equation (1). </p>
 
 <pre class="pre-scrollable">
 	<code class="python">
@@ -293,7 +293,7 @@ for outCh in range(nOutCh):
 <h4>4.2. Backward in Version #2</h4>
 <p>Again, the backward function must return 3 gradients of the loss w.r.t. to <i>inX</i>, <i>in_weight</i> and <i>in_bias</i> (if specified, otherwise a <i>None</i>) respectively, plus a <i>None</i> for convparam that is just a tuple of parameters and does not require gradient. </p>
 
-<p>It uses the same 3 nested for loops to compute the gradients and the core part is listed below. Inside the center of the loops, it also follows the two key ideas of the backpropagation chain rule: 1) summation of all paths and 2) product of upstream and local gradients along each path. Pleate note that, in calculation of the gradients of the kernel (<i>grad_weight</i>), the results are summed with <i>sum(axis=0)</i> because the kernel is applied to all samples, which is the 1<sup>st</sup> dimension (<i>axis=0</i>). The same logic applies to grad_bias too. </p>
+<p>It uses the same 3 nested <i>for</i> loops to compute the gradients and the core part is listed below. Inside the center of the loops, it also follows the two key ideas of the backpropagation chain rule: 1) summation of all paths and 2) product of upstream and local gradients along each path. Pleate note that, in calculation of the gradients of the kernel (<i>grad_weight</i>), the results are summed with <i>sum(axis=0)</i> because the kernel is applied to all samples, which is the 1<sup>st</sup> dimension (<i>axis=0</i>). The same logic applies to grad_bias too. </p>
 
 <pre class="pre-scrollable">
 	<code class="python">
