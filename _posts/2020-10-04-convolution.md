@@ -57,7 +57,7 @@ author: Xiyun Song
 <p>Pictures tells better stories. Animation in Figure 1 illustrates a convolution for a 3x3 kernel applied to a 5x5 input to get a 3x3 output. </p>
 
 <p align="center">
- <img src="{{ "/assets/images/Conv2d_0p_1s_1inCh.gif" | relative_url }}" style="border:solid; color:gray" width="500"> 
+ <img src="{{ "/assets/images/Conv2d_0p_1s_1inCh.gif" | relative_url }}" style="border:solid; color:gray" width="600"> 
 <br>Figure 1 Illustration of "convolution", actually cross-correlation. 
 </p> 
 
@@ -84,7 +84,7 @@ author: Xiyun Song
 <p>Animation in Figure 2 illustrates a convolution for a 3x3 kernel applied to 3 channels of 5x5 inputs with no padding and using unit stride to get 1 output channel. If more output channels are desired, each output channel will have a similar but separate path like Figure 2 except that the 3 left-most input channel blocks are shared by all output channels. </p>
 
 <p align="center">
- <img src="{{ "/assets/images/Conv2d_0p_1s_3inCh.gif" | relative_url }}" style="border:solid; color:gray" width="500"> 
+ <img src="{{ "/assets/images/Conv2d_0p_1s_3inCh.gif" | relative_url }}" style="border:solid; color:gray" width="600"> 
 <br>Figure 2 Illustration of Conv2d with 3 input channels and 1 output channel in the case of unit stride and no padding. 
 </p> 
 
@@ -101,7 +101,7 @@ author: Xiyun Song
 <p>Animation in Figure 3 illustrates a convolution for a 3x3 kernel applied to 3 channels of 5x5 inputs with 1x1 zero padding and 2x2 stride to get 1 output channel. </p>
 
 <p align="center">
- <img src="{{ "/assets/images/Conv2d_1p_2s_3inCh.gif" | relative_url }}" style="border:solid; color:gray" width="500"> 
+ <img src="{{ "/assets/images/Conv2d_1p_2s_3inCh.gif" | relative_url }}" style="border:solid; color:gray" width="600"> 
 <br>Figure 3 Illustration of Conv2d with 3 input channels and 1 output channel in the case of stride=2 and with padding. 
 </p> 
    
@@ -130,7 +130,7 @@ author: Xiyun Song
 	<span>\({N_{xOut} } = floor\left( {\frac{ {5 + 2 \times 0 - 3} }{1} } \right) + 1 = 3\) </span><span class="ref-num"> (4)</span>
 </div>
 
-<p>For the example of padding stride and no padding, \({N_{xIn} } = 5\), \({N_v} = 3\), \({P_x} = 1\) and \({S_x} = 2\), so the output size is </p>
+<p>For the example of non-unit stride and with padding, \({N_{xIn} } = 5\), \({N_v} = 3\), \({P_x} = 1\) and \({S_x} = 2\), so the output size is </p>
 
 <div class="alert alert-secondary equation">
 	<span>\({N_{xOut} } = floor\left( {\frac{ {5 + 2 \times 1 - 3} }{2} } \right) + 1 = 3\) </span><span class="ref-num"> (5)</span>
@@ -185,14 +185,23 @@ author: Xiyun Song
 
 <p>In general, if padding is small than the half padding, the output size is smaller than the input size. If padding is greater than the half padding, the output size is bigger than the input size. For half padding, the size remains the same. </p>
 
-<h3><a name="_Implementation2"></a>3.	Implementation #1 of Conv2d forward and backward   </h3>
+<h4>2.4. Use Conv2d to control number of channels and image size  </h4>
+<p>Now we understand that, with proper padding, stride and kernel size in Conv2d, we can generate output with either the same size or down-sampled size (instead of using the maxpool or avgpool layer) for various purposes. In addition, the number of output channels \({ N_{outCh} }\) can also be specified, typically via the 1st parameter of the 4-D kernel. Figure 4 shows an example of network using Conv2d to achieve the desired output channels, height and width.  </p>
+
+<p align="center">
+ <img src="{{ "/assets/images/Conv2d_size_usage_example.png" | relative_url }}" style="border:solid; color:gray"> 
+<br>Figure 4 An example of network using Conv2d to achieve the desired output channels, height and width. 
+</p> 
+
+
+<h3><a name="_Implementation2"></a>3. Implementation #1 of Conv2d forward and backward   </h3>
 <p>In order to gain hands-on experience and full understanding of Conv2d, we implemented two versions of the Conv2d, both by subclassing torch.autograd.Function and manually overriding the forward and backward methods. The 1<sup>st</sup> version is kind of collection of multiple small modules including unfold, matrix multiplication, fold, etc. The 2<sup>nd</sup> version is more like brute force implementation of the equations using nested for loops. </p>
 
 <p>To validate our custom implementations, we build a small Conv2d-LeakyReLU-Mean network and compared the outputs and autograd results with the Torch built-in implementation. The LeakyReLU layer is also custom implemented. </p>
 
 <p>This section covers Version #1 and the compete source code can be found on GitHub (<a href="https://github.com/coolgpu/Demo_Conv2d_forward_and_backward/blob/master/my_conv2d_v1.py">my_conv2d_v1.py</a>). </p>
 
-<h4>3.1.	Forward in Version #1 </h4>
+<h4>3.1. Forward in Version #1 </h4>
 <p>This implementation is inspired by the discussion of using unfold function <a href="https://discuss.pytorch.org/t/custom-convolution-dot-product/14992/3">here</a>. The forward function is overridden to take 5 input arguments: </p>
 <ul>
 	<li><strong>ctx</strong>: represent THIS instance of the class </li>
@@ -309,11 +318,11 @@ if in_bias is not None:
   
 
 <h3><a name="_Validation"></a>5. Validation against Torch built-ins   </h3>
-<p>To validate our custom implementations, we build a small <strong>Conv2d-LeakyReLU-Mean</strong> network (Figure 4) and compared the outputs and autograd results with the Torch built-in implementation<sup>[<a href="#_Reference1">1</a>]</sup>. The LeakyReLU layer is also custom implemented and <a href="https://github.com/coolgpu/Demo_Conv2d_forward_and_backward/blob/master/myLeakyReLU.py">the source code can be found here</a>. The validation code can be found <a href="https://github.com/coolgpu/Demo_Conv2d_forward_and_backward/blob/master/Test_my_conv2d_leakyReLU_forward_backward.py">here</a>. Results show that both implementations of Conv2d produced the same results as the Torch built-ins, including the output and the gradients w.r.t. the input, kernel and bias. </p>
+<p>To validate our custom implementations, we build a small <strong>Conv2d-LeakyReLU-Mean</strong> network (Figure 5) and compared the outputs and autograd results with the Torch built-in implementation<sup>[<a href="#_Reference1">1</a>]</sup>. The LeakyReLU layer is also custom implemented and <a href="https://github.com/coolgpu/Demo_Conv2d_forward_and_backward/blob/master/myLeakyReLU.py">the source code can be found here</a>. The validation code can be found <a href="https://github.com/coolgpu/Demo_Conv2d_forward_and_backward/blob/master/Test_my_conv2d_leakyReLU_forward_backward.py">here</a>. Results show that both implementations of Conv2d produced the same results as the Torch built-ins, including the output and the gradients w.r.t. the input, kernel and bias. </p>
 
 <p align="center">
  <img src="{{ "/assets/images/Conv2d_LeakyReLU_Mean_network.png" | relative_url }}" style="border:solid; color:gray" width="350"> 
-<br>Figure 4 Illustration of Conv2d-LeakyReLU-Mean network used for validation. 
+<br>Figure 5 Illustration of Conv2d-LeakyReLU-Mean network used for validation. 
 </p> 
     
 
@@ -321,11 +330,11 @@ if in_bias is not None:
 <p>In this post, we discussed the fundamentals of Conv2d and demonstrated how to implement its forward and backward autograd functions using 2 different ways. In the end, we built a simple BatchNorm-Sigmoid-MSELoss network to test our implementations. While we used Conv2d as the example, all ideas can be extended to Conv1d and Conv3d. We hope that, by going through this example, it can help us obtain a deeper understanding of the convolution in neural networks. In next post, we will move to ConvTranpose. </p>
 
 <h3><a name="_Extra"></a>7.	Extra – Edge detection and Smoothing using pre-defined kernels</h3>
-<p>While the convolution kernel and bias are learnable parameters in convolutional neural networks, standalone Conv2d can also be used to perform specific tasks using pre-defined kernels. In this section, we would like to demonstrate two applications of Conv2d: edge detection and smoothing. In both examples, we use the same input image as shown in Figure 5. </p>
+<p>While the convolution kernel and bias are learnable parameters in convolutional neural networks, standalone Conv2d can also be used to perform specific tasks using pre-defined kernels. In this section, we would like to demonstrate two applications of Conv2d: edge detection and smoothing. In both examples, we use the same input image as shown in Figure 6. </p>
 
 <p align="center">
  <img src="{{ "/assets/images/Conv2d_leaf_original.png" | relative_url }}" style="border:solid; color:gray" width="350"> 
-<br>Figure 5 The original image of leaves. 
+<br>Figure 6 The original image of leaves. 
 </p> 
    
 
@@ -344,11 +353,11 @@ if in_bias is not None:
 	<span>\( \boldsymbol {O}  = \sqrt { { {\left( { \boldsymbol {I}  \otimes  \boldsymbol {K_1} } \right)}^2} + { {\left( { \boldsymbol {I}  \otimes  \boldsymbol {K_2} } \right)}^2} } \) </span><span class="ref-num"> (13)</span>
 </div>		
 
-<p>The source code can be found <a href="https://github.com/coolgpu/Demo_Conv2d_forward_and_backward/blob/master/Conv2d_Extra.py">here</a> and the output image is shown in Figure 6. </p>
+<p>The source code can be found <a href="https://github.com/coolgpu/Demo_Conv2d_forward_and_backward/blob/master/Conv2d_Extra.py">here</a> and the output image is shown in Figure 7. </p>
 
 <p align="center">
  <img src="{{ "/assets/images/Conv2d_leaf_sobel_edge_out.png" | relative_url }}" style="border:solid; color:gray" width="350"> 
-<br>Figure 6 The Sobel edge detection output image. 
+<br>Figure 7 The Sobel edge detection output image. 
 </p> 
 
 
@@ -366,11 +375,11 @@ if in_bias is not None:
 	<span>\( \boldsymbol {O}  =  \boldsymbol {I}  \otimes  \boldsymbol {G} \) </span><span class="ref-num"> (15)</span>
 </div>		
 
-<p>The source code can be found <a href="https://github.com/coolgpu/Demo_Conv2d_forward_and_backward/blob/master/Conv2d_Extra.py">here</a> and the blurred output image is shown in Figure 7. </p>
+<p>The source code can be found <a href="https://github.com/coolgpu/Demo_Conv2d_forward_and_backward/blob/master/Conv2d_Extra.py">here</a> and the blurred output image is shown in Figure 8. </p>
 
 <p align="center">
  <img src="{{ "/assets/images/Conv2d_leaf_gaussian_blur_out.png" | relative_url }}" style="border:solid; color:gray" width="350"> 
-<br>Figure 7 The the Gaussian blurred output image.
+<br>Figure 8 The the Gaussian blurred output image.
 </p> 
 
 
