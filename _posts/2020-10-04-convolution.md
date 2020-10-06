@@ -334,8 +334,8 @@ if in_bias is not None:
 <h3><a name="_Summary"></a><span style="color:darkblue">6. Summary </span></h3> 
 <p>In this post, we discussed the fundamentals of Conv2d and demonstrated how to implement its forward and backward autograd functions using 2 different ways. In the end, we built a simple <strong><i>Conv2d-LeakyReLU-Mean</i></strong> network to test our implementations. Only Conv2d is used as example, but all ideas can be extended to Conv1d and Conv3d. We hope that, by going through this example, it can help us obtain a deeper understanding of the convolution in neural networks. In next post, we will move to ConvTranpose. </p>
 
-<h3><a name="_Extra"></a><span style="color:darkblue">7.	Extra – Edge detection and Smoothing using pre-defined kernels</span></h3>
-<p>While the convolution kernel and bias are learnable parameters in convolutional neural networks, standalone Conv2d can also be used to perform specific tasks using pre-defined kernels. In this section, we would like to demonstrate two applications of Conv2d: edge detection and smoothing. In both examples, we use the same input image as shown in Figure 6. </p>
+<h3><a name="_Extra"></a><span style="color:darkblue">7. Extra – Edge detection and smoothing using pre-defined kernels</span></h3>
+<p>While the convolution kernel and bias in neural networks are learnable parameters, standalone Conv2d can also be used to perform specific tasks using pre-defined kernels. In this section, we would like to demonstrate two applications of Conv2d: edge detection and smoothing. In both examples, we use the same input image as shown in Figure 6. </p>
 
 <p align="center">
  <img src="{{ "/assets/images/Conv2d_leaf_original.png" | relative_url }}" style="border:solid; color:gray" width="600"> 
@@ -352,7 +352,7 @@ if in_bias is not None:
 </div>	
 
 
-<p>For a given 2-D input image \( \boldsymbol {I} \), the Sobel edge detection output image \( \boldsymbol {O} \) is given by </p>
+<p>For a 2-D input image \( \boldsymbol {I} \), the Sobel edge detection output image \( \boldsymbol {O} \) is given by </p>
 
 <div class="alert alert-secondary equation">
 	<span>\( \boldsymbol {O}  = \sqrt { { {\left( { \boldsymbol {I}  \otimes  \boldsymbol {K_1} } \right)}^2} + { {\left( { \boldsymbol {I}  \otimes  \boldsymbol {K_2} } \right)}^2} } \) </span><span class="ref-num"> (13)</span>
@@ -366,7 +366,7 @@ if in_bias is not None:
 </p> 
 
 
-<h4><span style="color:darkblue">7.2.	Gaussian blurring using Conv2d</span></h4>
+<h4><span style="color:darkblue">7.2. Gaussian blurring using Conv2d</span></h4>
 <p>A normalized 5x5 Gaussian kernel is given by </p>
 
 <div class="alert alert-secondary equation">
@@ -374,7 +374,7 @@ if in_bias is not None:
 </div>	
 
 
-<p>For a given 2-D input image \( \boldsymbol {I} \), the Gaussian blurred output image \( \boldsymbol {O} \) is given by </p>
+<p>For a 2-D input image \( \boldsymbol {I} \), the Gaussian blurred output image \( \boldsymbol {O} \) is given by </p>
 
 <div class="alert alert-secondary equation">
 	<span>\( \boldsymbol {O}  =  \boldsymbol {I}  \otimes  \boldsymbol {G} \) </span><span class="ref-num"> (15)</span>
