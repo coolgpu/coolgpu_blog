@@ -5,7 +5,7 @@ date:   2020-09-12 16:18:41 -0700
 categories: jekyll update
 author: Xiyun Song
 ---
-<p>It is a busy but pretty happy learning expereience in the past two days during the pandemic. </p>
+<p>It is a busy but pretty happy learning expereience in the past two vacation days during this special year. </p>
 <ul>
   <li>Basics of html with css and javascript. </li>
   <li>Basics of MathJax and how to convert equations in Office Word to what MathJax supports so that they can be displayed properly and beautifully in html.</li>

@@ -27,7 +27,7 @@ author: Xiyun Song
 	<li><a href="#_References">References</a></li>
 </ul>
 
-<h3><a name="_The_simple_network"></a>1. The simple network model</h3>  
+<h3><a name="_The_simple_network"></a><span style="color:darkblue">1. The simple network model</span></h3>  
 <p>The example network model is illustrated in Figure 1. It consists of two layers (BatchNorm module and activator Sigmoid) followed by a mean square error (MSE) loss module. Let’s take a look at the forward pass (from bottom to top).</p>
 
 <p align="center">
@@ -92,8 +92,8 @@ author: Xiyun Song
 
 <p>BTW, this post is not focused on parameter update from the gradients, so that part is not included in this post. We can write separate posts about that too.    </p>
 
-<h3><a name="_Derivation_of_the_gradients"></a>2. Derivation of the gradients</h3>
-<h4>2.1 The chain rule</h4>
+<h3><a name="_Derivation_of_the_gradients"></a><span style="color:darkblue">2. Derivation of the gradients</span></h3>
+<h4><span style="color:darkblue">2.1 The chain rule</span></h4>
 <p>We will follow the chain rule to do backpropagation to compute gradients. Since there is a huge amount of online resources available talking about the chain rule, we just summarize its main idea here. Given a function \(L\left( { {x_1},{x_2}, \ldots {x_N} } \right)\) as</p>
 
 <div class="alert alert-secondary equation">
@@ -112,12 +112,12 @@ author: Xiyun Song
 <li>Product means that, along each path \(m\), the output gradient equals the upstream passed in, \(\frac{ {\partial L} }{ {\partial {f_m} } }\), times the local gradient, \(\frac{ {\partial {f_m} } }{ {\partial {x_i} } }\). </li>
 </ul>
 
-<h4>2.2 Dimensions of the gradients</h4>
+<h4><span style="color:darkblue">2.2 Dimensions of the gradients</span></h4>
 <p>Please note that, the loss function in a neural network gives a scalar value output loss. The gradient of the loss w.r.t. any trainable parameter or input variable should have the same dimension as that parameter or variable, whether it is another scalar, or a 1-D vector, or N-D array. </p>
  
 <p>For example, the trainable parameter \(\vec w = \left( { {w_1},{w_2}, \ldots {w_{ {N_c} } } } \right)\)  of the Batch Norm module is a 1-D vector containing \({N_c}\) elements with one element corresponding to one channel; therefore, the gradient \(\frac{ {\partial L} }{ {\partial \vec w} }\) should also be a 1-D vector containing \({N_c}\) elements, \(\frac{ {\partial L} }{ {\partial \vec w} } = \left( {\frac{ {\partial L} }{ {\partial {w_1} } },\frac{ {\partial L} }{ {\partial {w_2} } }, \ldots \frac{ {\partial L} }{ {\partial {w_{ {N_c} } } } } } \right)\). </p>
  
-<h4>2.3 Derivation of the gradient \(\frac{ {\partial L} }{ {\partial \vec w} }\)  </h4> 
+<h4><span style="color:darkblue">2.3 Derivation of the gradient \(\frac{ {\partial L} }{ {\partial \vec w} }\)  </span></h4> 
 <p>Let’s first derive the upstream gradients using the chain rule to derive \(\frac{ {\partial L} }{ {\partial \vec w} }\) or element-wise \(\frac{ {\partial L} }{ {\partial {w_c} } }\).</p>
 <p>From Equation (9) for the MSE loss function, we have the partial derivative</p>
 
@@ -151,7 +151,7 @@ author: Xiyun Song
 
 <p>The upstream gradient terms in Equations (14) and (16) are not substituted with their expanded format because their values have been computed and are available from upstream calculation, so there is no need to re-compute them every time they are used. That’s why the chain rule is an effective method for backpropagation.</p>
 
-<h4>2.4 Derivation of gradient \(\frac{ {\partial L} }{ {\partial \vec \beta } }\)  </h4> 
+<h4><span style="color:darkblue">2.4 Derivation of gradient \(\frac{ {\partial L} }{ {\partial \vec \beta } }\)  </span></h4> 
 <p>Similarly, the local gradient for \(\vec \beta \) can be derived from Equation (5) for BatchNorm</p>
 
 <div class="alert alert-secondary equation">
@@ -164,7 +164,7 @@ author: Xiyun Song
 	<span>\(\frac{ {\partial L} }{ {\partial {\beta _c} } } = \mathop \sum \limits_{i = 1}^{ {N_i} } \frac{ {\partial L} }{ {\partial {y_{c,i} } } }\frac{ {\partial {y_{c,i} } } }{ {\partial {\beta _c} } } = \mathop \sum \limits_{i = 1}^{ {N_i} } \frac{ {\partial L} }{ {\partial {y_{c,i} } } }\cdot1 = \mathop \sum \limits_{i = 1}^{ {N_i} } \frac{ {\partial L} }{ {\partial {y_{c,i} } } }\)</span><span class="ref-num">(18)</span>
 </div>
 
-<h4>2.5 Derivation of gradient \(\frac{ {\partial L} }{ {\partial \vec x} }\)   </h4>
+<h4><span style="color:darkblue">2.5 Derivation of gradient \(\frac{ {\partial L} }{ {\partial \vec x} }\)   </span></h4>
 <p>Derivation of gradient w.r.t \(\vec x\) is more complicated than \(\vec w\) and \(\vec \beta \) because each \({x_{c,i} }\) directly contributes to \({y_{c,i} }\) and also indirectly contributes to other \({y_{c,k} }\) elements via \({\mu _c}\left( { {x_{c,1} }, \ldots ,{x_{c,{N_i} } } } \right)\) and \({\sigma ^2}_c\left( { {x_{c,1} }, \ldots ,{x_{c,{N_i} } } } \right)\), as shown in Figure 2. To help understand the underneath logic, we will demonstrate two different ways to solve this challenge and achieve the same solution. </p>
 
 <p align="center">
@@ -311,7 +311,7 @@ Using the chain rule, we have
 
 <p>Equation (29) is identical to Equation (22): two solutions, the same answer. We took this effort to demonstrate that a problem can be solved using different solutions. Derivation is done! </p>
 
-<h3><a name="_Custom_implementations_and_validation"></a>3. Custom implementations and validation  </h3>
+<h3><a name="_Custom_implementations_and_validation"></a><span style="color:darkblue">3. Custom implementations and validation  </span></h3>
 <p>Two separate implementations of the forward pass, loss calculation, and backpropagation are demonstrated in this post. The 1st one uses PyTorch and the 2nd one uses Numpy. The functions and corresponding equations are summarized in Table below. </p>
 
 <table>
@@ -354,10 +354,10 @@ Using the chain rule, we have
 <p>You can find <a href="https://github.com/coolgpu/backpropagation_w_example/blob/master/src/batchnorm_sigmoid_mse_network.py">the source code on GitHub</a>. If you like, you can also implement using Tensorflow as well to gain hands-on experience. </p> 
 
 
-<h3><a name="_Summary"></a>4. Summary </h3>
+<h3><a name="_Summary"></a><span style="color:darkblue">4. Summary </span></h3>
 <p>In this post, we used a simple BatchNorm-Sigmoid-MSELoss network to demonstrate how to use the chain rule to derive gradients in backpropagation and how to implement the custom autograd functions. We hope that, by going over this example, it can help obtain a deeper understanding of the fundamentals of neural networks, especially about backpropagation. </p>
 
-<h3><a name="_Extra"></a>5. Extra</h3> 
+<h3><a name="_Extra"></a><span style="color:darkblue">5. Extra</span></h3> 
 <p>In the derivation above we found that the partial derivatives of the biased variance \({\sigma ^2}\) w.r.t to the input \(\vec x\) and mean \(\mu \) are \(\frac{ {\partial {\sigma ^2} } }{ {\partial {x_i} } } = \frac{ {2\left( { {x_i} - \mu } \right)} }{N}\) and \(\frac{ {\partial {\sigma ^2} } }{ {\partial \mu } } = 0\), respectively. If it sounds a little bit surprising to see these results and especially \(\frac{ {\partial {\sigma ^2} } }{ {\partial \mu } } = 0\), you can write a few lines of Python codes to verify it, just as below.</p>
 <pre class="pre-scrollable">
 	<code class="python">
@@ -375,7 +375,7 @@ Using the chain rule, we have
 	</code>
 </pre>
 
-<h3><a name="_References"></a>6. References</h3> 
+<h3><a name="_References"></a><span style="color:darkblue">6. References</span></h3> 
 <ul>
 	<li><a name="_Reference1"></a>[1] Diederik P. Kingma and Jimmy Lei Ba (2014). <a href="https://arxiv.org/abs/1412.6980">Adam : A method for stochastic optimization.</a></li>
 	<li><a name="_Reference2"></a>[2] Sergey Ioffe and Christian Szegedy (2015). <a href="https://arxiv.org/abs/1502.03167">Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift.</a></li>

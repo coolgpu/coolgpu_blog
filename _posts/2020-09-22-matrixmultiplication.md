@@ -13,6 +13,7 @@ author: Xiyun Song
 	<li><a href="">Matrix multiplication and its custom implementation (this post)</a></li>
 	<li><a href="https://coolgpu.github.io/coolgpu_blog/github/pages/2020/10/04/convolution.html">Conv2d and its gradients</a></li>
 	<li>ConvTranpose2d and its gradients </li>
+	<li>Momentum, RMSProp and Adam Optimizers </li>
 	<li>Application of Conv2d and ConvTranpose2d in Neural Networks</li>
 </ul>
 
@@ -27,7 +28,7 @@ author: Xiyun Song
 	<li><a href="#_References">References</a></li>
 </ul>
 
-<h3><a name="_Matrix_multiplication"></a>1.	Matrix multiplication</h3>  
+<h3><a name="_Matrix_multiplication"></a><span style="color:darkblue">1. Matrix multiplication</span></h3>  
 
 <p>The definition of matrix multiplication can be found in every linear algebra book. Let’s use the definition from <a href="https://en.wikipedia.org/wiki/Matrix_multiplication">Wikipedia</a>. Given a \(m \times k\) matrix \(\boldsymbol {A}\) and a \(k \times n\) matrix \(\boldsymbol {B}\)</p>
 
@@ -49,8 +50,8 @@ author: Xiyun Song
 
 <p>for \(i = 1, \ldots ,m\) and \(j = 1, \ldots ,n\). In other words, \({c_{ij}}\) is the dot product of the \(i\)th row of \(\boldsymbol {A} \) and the \(j\)th column of \(\boldsymbol {B} \). </p>
 
-<h3><a name="_Derivation_of_the_gradients"></a>2. Derivation of the gradients</h3>
-<h4>2.1. Dimensions of the gradients</h4>
+<h3><a name="_Derivation_of_the_gradients"></a><span style="color:darkblue">2. Derivation of the gradients</span></h3>
+<h4><span style="color:darkblue">2.1. Dimensions of the gradients</span></h4>
 <p>If we are considering an isolated matrix multiplication, the partial derivative matrix \(\boldsymbol {C} \) with respect to either matrix \(\boldsymbol {A} \) and matrix \(\boldsymbol {B} \) would be a 4-D hyper-space relationship, referred to as <a href="https://en.wikipedia.org/wiki/Jacobian_matrix_and_determinant">Jacobian Matrix</a>. You will also find that there will be many zeros in the 4-D Jacobian Matrix because, as shown in Equation (3), \({c_{ij} }\) is a function of only the \(i\)th row of \(\boldsymbol {A} \) and the \(j\)th column of \(\boldsymbol {B} \), and independent of other rows of \(\boldsymbol {A} \) and other columns of \(\boldsymbol {B} \). </p>
 
 <p>What we are considering here is not an isolated matrix multiplication. Instead, we are talking about matrix multiplication inside a neural network that will have a scalar loss function. For example, consider a simple case where the loss \(L\) is the mean of matrix \(\boldsymbol {C} \):</p>
@@ -61,7 +62,7 @@ author: Xiyun Song
 
 <p>our focus is the partial derivatives of scalar \(L\) w.r.t. the input matrix \(\boldsymbol {A} \) and \(\boldsymbol {B} \),  \(\frac{ {\partial L} }{ {\partial \boldsymbol {A} } }\) and \(\frac{ {\partial L} }{ {\partial \boldsymbol {B} } }\), respectively. Therefore, \(\frac{ {\partial L} }{ {\partial \boldsymbol {A} } }\) has the same dimension as \(\boldsymbol {A} \), which is another \(m \times k\) matrix, and  \(\frac{ {\partial L} }{ {\partial \boldsymbol {B} } }\) has the same dimension as \(\boldsymbol {B} \), which is another \(k \times n\) matrix.</p>
 
-<h4>2.2 The chain rule</h4>
+<h4><span style="color:darkblue">2.2 The chain rule</span></h4>
 <p>We will use the chain rule to do backpropagation of gradients. For such an important tool in neural networks, it doesn’t hurt to briefly summarize the chain rule just like in <a href="https://coolgpu.github.io/coolgpu_blog/github/pages/2020/09/14/backpropagation.html">the previous post</a> for one more time. Given a function \(L\left( { {x_1},{x_2}, \ldots {x_N} } \right)\) as</p>
 
 <div class="alert alert-secondary equation">
@@ -81,7 +82,7 @@ author: Xiyun Song
 </ul>
 
 
-<h4>2.3 Derivation of the gradient \(\frac{ {\partial L} }{ {\partial  \boldsymbol {\boldsymbol {A} } } }\)  </h4> 
+<h4><span style="color:darkblue">2.3 Derivation of the gradient \(\frac{ {\partial L} }{ {\partial  \boldsymbol {\boldsymbol {A} } } }\)  </span></h4> 
 <p>In this section, we will use a \(2 \times 4\) matrix \(\boldsymbol {A} \) and a \(4 \times 3\) matrix \(\boldsymbol {B} \) as an example to step-by-step derive the partial derivative of \(\frac{ {\partial L} }{ {\partial \boldsymbol {A} } }\). Please note that the same derivation can be performed on a general \(m \times k\) matrix \(\boldsymbol {A} \) and \(k \times n\) matrix \(\boldsymbol {B} \). A specific example is used here purely for the purpose of making it more straightforward. </p>
 
 <p>Let’s start with writing the matrix \(\boldsymbol {A} \), \(\boldsymbol {B} \) and their matrix product \(\boldsymbol {C}  = AB\) in expanded format.</p>
@@ -162,7 +163,7 @@ author: Xiyun Song
 <p> Equation (13) shows that, for a matrix multiplication \(\boldsymbol {C}  = \boldsymbol{A}\boldsymbol{B}\) in a neural network, the derivative of the loss \( L \) w.r.t matrix \(\boldsymbol {A} \) equals the upstream derivative \(\frac{ {\partial L} }{ {\partial \boldsymbol {C} } }\) times the transpose of matrix \(\boldsymbol {B} \). Let’s check the dimensions. On the left hand side of Equation (13), \(\frac{ {\partial L} }{ {\partial \boldsymbol {A} } }\) has a dimension of \(m \times k\), the same as \( \boldsymbol {A} \). On the right hand side,  \(\frac{ {\partial L} }{ {\partial \boldsymbol {C} } }\) has a dimension of \(m \times n\) and \({\boldsymbol {B} ^T}\) has a dimension of \(n \times k\); therefore, their matrix product has a dimension of \(m \times k\) and matches that of \(\frac{ {\partial L} }{ {\partial \boldsymbol {A} } }\). </p>
 
 
-<h4>2.4 Derivation of the gradient \(\frac{ {\partial L} }{ {\partial  \boldsymbol {\boldsymbol {B} } } }\)  </h4> 
+<h4><span style="color:darkblue">2.4 Derivation of the gradient \(\frac{ {\partial L} }{ {\partial  \boldsymbol {\boldsymbol {B} } } }\)  </span></h4> 
 <p>Similarly, for \(\frac{ {\partial L} }{ {\partial \boldsymbol {B} } }\), let’s consider an arbitrary element of \(\boldsymbol {B} \), for example \({ \color{blue} b_{12} }\), we have the local partial derivative of \(\boldsymbol {C} \)  w.r.t. \({ \color{blue} b_{12} }\) based on Equation (8) above. </p>
 
 <div class="alert alert-secondary equation">
@@ -225,7 +226,7 @@ author: Xiyun Song
 
 <p> Again, the above derivations can be generalized to any matrix multiplication. If you have time, you can derive it by yourself, just make sure the subscript indices are correct. </p>
 
-<h3><a name="_Custom_implementations_and_validation"></a>3. Custom implementations and validation  </h3>
+<h3><a name="_Custom_implementations_and_validation"></a><span style="color:darkblue">3. Custom implementations and validation  </span></h3>
 <p>With the derived Equations (13) and (18), it is in fact pretty easy to implement the backward pass of matrix multiplication. Please see <a href="https://github.com/coolgpu/Demo_Matrix_Multiplication_backward/blob/master/Demo_MatrixMultiplication_backward.py">the example implementation on GitHub</a> for a network that simply takes the mean of the matrix product \(\boldsymbol {C}  = \boldsymbol {A}  \boldsymbol {B} \) as the loss. The core part is just a 3-line code as demonstrated below.  </p>
 
 <pre class="pre-scrollable">
@@ -246,7 +247,7 @@ author: Xiyun Song
 
 <p>To validate our derivations and implementation, we compared these results with those from Torch built-in implementation via <b><i>loss.backward()</i></b> and they matched.  </p>
 
-<h3><a name="_Summary"></a>4. Summary </h3>
+<h3><a name="_Summary"></a><span style="color:darkblue">4. Summary </span></h3>
 <p>In this post, we demonstrated how to derive the gradients of matrix multiplication in neural networks. While the derivation steps seem complex, the final equations of the gradients are pretty simple and easy to implement:  </p>
 
 <div class="alert alert-secondary equation">
@@ -264,7 +265,7 @@ author: Xiyun Song
 
 <p> With matrix multiplication covered, we will move to Convolution in the next post. Please stay tuned. </p>
 
-<h3><a name="_References"></a>5. References</h3> 
+<h3><a name="_References"></a><span style="color:darkblue">5. References</span></h3> 
 <ul>
 	<li><a name="_Reference1"></a>[1] Olaf Ronneberger, Philipp Fischer, Thomas Brox (2015). <a href="https://arxiv.org/abs/1505.04597">U-Net: Convolutional Networks for Biomedical Image Segmentation.</a></li>
 	<li><a name="_Reference2"></a>[2] Kaiming He, Xiangyu Zhang, Shaoqing Ren, Jian Sun (2015). <a href="https://arxiv.org/abs/1512.03385">Deep Residual Learning for Image Recognition.</a></li>	

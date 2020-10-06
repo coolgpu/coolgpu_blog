@@ -14,6 +14,7 @@ author: Xiyun Song
 	<li><a href="https://coolgpu.github.io/coolgpu_blog/github/pages/2020/09/22/matrixmultiplication.html">Matrix multiplication and its custom implementation</a></li>
 	<li><a href="">Conv2d and its gradients (this post)</a></li>
 	<li>ConvTranpose2d and its gradients </li>
+	<li>Momentum, RMSProp and Adam Optimizers </li>
 	<li>Application of Conv2d and ConvTranpose2d in Neural Networks</li>
 </ul>
 
@@ -28,21 +29,21 @@ author: Xiyun Song
 	<li><a href="#_Custom_implementation2">Implementation #2 of Conv2d forward and backward </a></li>	
 	<li><a href="#_Validation">Validation against the Torch Build-ins  </a></li>	
 	<li><a href="#_Summary">Summary</a></li>
-	<li><a href="#_Extra">Extra</a></li>
+	<li><a href="#_Extra">Extra - Edge detector and smoothing using Conv2d </a></li>
 	<li><a href="#_References">References</a></li>
 </ul>
 
-<h3><a name="_Conv2d"></a>1. Conv2d</h3>  
+<h3><a name="_Conv2d"></a><span style="color:darkblue">1. Conv2d</span></h3>  
 <p>Discrete convolution is used in neural networks to extract features of input images by applying a dot product with a sliding kernel. Let’s introduce two terminologies relevant to convolution:</p>
 
 
 <ul>
 	<li><strong>Stride</strong>: the step size (in unit of pixels) of the kernel when sliding over the input image. When the step size is 1 (stride=1), it is called unit stride.</li>
-	<li><strong>Padding</strong>: Padding means extend the input image area by adding extra columns and rows of pixels to the outside border of the image. If all added pixels are filled with value zero, it is called zero-padding, which is the most common mode of padding.</li>
+	<li><strong>Padding</strong>: Padding means to extend the input image area by adding extra columns and rows of pixels to the outside border of the image. If all added pixels are filled with value zero, it is called zero-padding, which is the most common mode of padding.</li>
 </ul>
 
 
-<h4>1.1. Basic Conv2d with unit stride and no padding  </h4>
+<h4><span style="color:darkblue">1.1. Basic Conv2d with unit stride and no padding  </span></h4>
 <p>We will start with the simplest case: Stride=1 and no padding. Given an input image \(\boldsymbol {I}\left( {y,x} \right)\) with an image size of \(\left( { {N_y},{N_x} } \right)\) and a sliding kernel \( \boldsymbol {K} \left( {u,v} \right)\) with \({N_u}\) rows and \({N_v}\) columns, the output, \( \boldsymbol {O} \), of the convolution between \( \boldsymbol {I} \) and \( \boldsymbol {K} \) can be defined as </p>
 
 
@@ -70,7 +71,7 @@ author: Xiyun Song
 </ul>
 
 
-<h4>1.2. Multiple feature channel Conv2d with unit stride and no padding  </h4>
+<h4><span style="color:darkblue">1.2. Multiple feature channel Conv2d with unit stride and no padding  </span></h4>
 <p>The basic convolution discussed in Section 1.1 can be thought of as the case where the input image has only one feature channel. In real deep learning networks, the number of feature channels of the input and output images of a convolution layer can be any (reasonable) positive integer, for example, 1, 3, 8, etc., depending on specific tasks, how deep and how wide the network would be, and how much hardware resource available, etc. In the case of multi-data and multi-channels, let’s consider a Conv2d with data presented as tensors: a 4-D filter kernel tensor \( \boldsymbol {K} \left( { {N_{outCh} },{N_{inCh} },{N_u},{N_v} } \right)\), a 4-D input tensor \( \boldsymbol {I} \left( { {N_s},{N_{inCh} },{H_{in} },{W_{in} } } \right)\) and a 4-D output tensor \( \boldsymbol {O} \left( { {N_s},{N_{outCh} },{H_{out} },{W_{out} } } \right)\). The \({c_{out} }\)-th output channel result of the \(n\)-th sample, labeled as \( \boldsymbol {O} \left( {n,{c_{out} },*,*} \right)\), can be described by </p>
 
 <div class="alert alert-secondary equation">
@@ -89,7 +90,7 @@ author: Xiyun Song
 </p> 
 
 
-<h4>1.3. Multiple feature channel Conv2d with non-unit stride and padding  </h4>
+<h4><span style="color:darkblue">1.3. Multiple feature channel Conv2d with non-unit stride and padding  </span></h4>
 <p>The situation gets a little more complex when both non-unit stride and padding are involved in convolution. However, the analysis is still the same. Let’s continue to use the example in Section 1.2, but with stride=2 and padding=1. There are two changes in this case:</p>
 
 <ul>
@@ -108,8 +109,8 @@ author: Xiyun Song
 
 <p>You might have already noticed that the output height and width are still 3x3, the same as unit-stride and no padding. In general, padding makes the output size bigger and non-unit stride makes it smaller. These two factors happen to cancel out in this particular example, so the image size remains the same. However, they don’t cancel out in most cases. We will discuss the relationship between the input, kernel and output sizes in the next section. </p>
 
-<h3><a name="_Dimensions"></a>2.	Convolution output size  </h3>
-<h4>2.1.	General equations for output height and width  </h4>
+<h3><a name="_Dimensions"></a><span style="color:darkblue">2. Convolution output size  </span></h3>
+<h4><span style="color:darkblue">2.1.	General equations for output height and width  </span></h4>
 <p>From the previous section, we have learnt that the output width, \({N_{xOut} }\), depends on the input image width \({N_{xIn} }\), the kernel width \({N_v}\), horizontal padding \({P_x}\) and horizontal stride \({S_x}\). Similarly, the output height, \({N_{yOut} }\), depends on the input image height \({N_{yIn} }\), the kernel height \({N_u}\), vertical padding \({P_y}\) and vertical stride \({S_y}\). If other convolution parameters such as dilation are not considered for simplicity, the relationship can be written as </p>
 
 <div class="alert alert-secondary equation">
@@ -138,7 +139,7 @@ author: Xiyun Song
 
 <p>The results happen to be the same for these two particular examples. As mentioned earlier, if the parameters are changed, it can be different. </p>
 
-<h4>2.2.	Special case – half padding  </h4>
+<h4><span style="color:darkblue">2.2.	Special case – half padding  </span></h4>
 <p>Here is a question: if we want the output size (image height and width) to be the same as the input size, how to achieve it? Equation (3) shows that it has to be unit stride \({S_x} = 1\), otherwise, the output size is guaranteed to be smaller. Under this condition, Equation (3) is reduced to </p>
 
 <div class="alert alert-secondary equation">
@@ -174,7 +175,7 @@ author: Xiyun Song
 </ul>
 
 
-<h4>2.3.	Special case – full padding  </h4>
+<h4><span style="color:darkblue">2.3.	Special case – full padding  </span></h4>
 <p>Full padding refers to the case where padding is one smaller than the kernel size \({P_x} = {N_v} - 1\) and unit stride \({S_x} = 1\). Based on Equation (3) the output width is </p>
 
 <div class="alert alert-secondary equation">
@@ -185,7 +186,7 @@ author: Xiyun Song
 
 <p>In general, if padding is small than the half padding, the output size is smaller than the input size. If padding is greater than the half padding, the output size is bigger than the input size. For half padding, the size remains the same. </p>
 
-<h4>2.4. Use Conv2d to control number of channels and image size  </h4>
+<h4><span style="color:darkblue">2.4. Use Conv2d to control number of channels and image size  </span></h4>
 <p>Now we understand that, with proper padding, stride and kernel size in Conv2d, we can generate output with either the same size or down-sampled size (instead of using the maxpool or avgpool layer) for various purposes. In addition, the number of output channels \({ N_{outCh} }\) can also be specified, typically via the 1st parameter of the 4-D kernel. Figure 4 shows an example of network using Conv2d to achieve the desired output channels, height and width.  </p>
 
 <p align="center">
@@ -194,14 +195,14 @@ author: Xiyun Song
 </p> 
 
 
-<h3><a name="_Implementation2"></a>3. Implementation #1 of Conv2d forward and backward   </h3>
+<h3><a name="_Implementation2"></a><span style="color:darkblue">3. Implementation #1 of Conv2d forward and backward </span></h3>
 <p>In order to gain hands-on experience and full understanding of Conv2d, we implemented two versions of the Conv2d, both by subclassing torch.autograd.Function and manually overriding the forward and backward methods. The 1<sup>st</sup> version is kind of collection of multiple small modules including unfold, matrix multiplication, fold, etc. The 2<sup>nd</sup> version is more like brute force implementation of the equations using nested <i>for</i> loops. </p>
 
 <p>To validate our custom implementations, we build a small <i>Conv2d-LeakyReLU-Mean</i> network and compared the outputs and autograd results with the Torch built-in implementation. The <i>LeakyReLU</i> layer is also custom implemented. </p>
 
 <p>This section covers Version #1 and the compete source code can be found on GitHub (<a href="https://github.com/coolgpu/Demo_Conv2d_forward_and_backward/blob/master/my_conv2d_v1.py">my_conv2d_v1.py</a>). </p>
 
-<h4>3.1. Forward in Version #1 </h4>
+<h4><span style="color:darkblue">3.1. Forward in Version #1 </span></h4>
 <p>This implementation is inspired by the discussion of using unfold function <a href="https://discuss.pytorch.org/t/custom-convolution-dot-product/14992/3">here</a>. The forward function is overridden to take 5 input arguments: </p>
 <ul>
 	<li><strong>ctx</strong>: represent THIS instance of the class </li>
@@ -241,7 +242,7 @@ author: Xiyun Song
 
 <p>It returns a 4-D tensor of the convolution results with a shape of (<i>nImgSamples, nOutCh, nOutRows, nOutCols</i>). </p>
 
-<h4>3.2. Backward in Version #1</h4>
+<h4><span style="color:darkblue">3.2. Backward in Version #1</span></h4>
 <p>The backward function is overridden to take one argument (in addition to THIS instance <i>ctx</i>), which must match the output list of the forward function:</p>
 
 <ul>
@@ -264,10 +265,10 @@ author: Xiyun Song
 <p>Another thing to note is that the fold function is called, like a counterpart of the unfold function used in the forward function, to sum and patch the intermediate gradient data <i>grad_inX_nSamp_nB_nL</i> back into the shape of <i>inX</i>, (<i>nImgSamples, nInCh, nInImgRows, nInImgCols</i>). </p>
 
 
-<h3><a name="_Implementation2"></a>4. Implementation #2 of Conv2d forward and backward </h3>  
+<h3><a name="_Implementation2"></a><span style="color:darkblue">4. Implementation #2 of Conv2d forward and backward </span></h3>  
 <p>The 2<sup>nd</sup> version of implementation of Conv2d has the same interfaces of the forward and backward function when subclassing torch.autograd.Function. Different from the 1<sup>st</sup> version that is a collection of multiple steps, the 2<sup>nd</sup> version directly implements the equations (1) and (2) using 3 nested <i>for</i> loops. Please see the complete source code of this implementation (<a href="https://github.com/coolgpu/Demo_Conv2d_forward_and_backward/blob/master/my_conv2d_v2.py">my_conv2d_v2.py</a>) on GitHub. </p>
 
-<h4>4.1. Forward in Version #2 </h4>
+<h4><span style="color:darkblue">4.1. Forward in Version #2 </span></h4>
 <p>The core part is listed below. For convenience of calculation, the input tensor inX is padded to a new bigger tensor paddedX. Inside the center of the 3 nested <i>for</i> loops, it is the element-wise multiplication of the input patch with the kernel, followed by the sum, which is exactly implementation of Equation (1). </p>
 
 <pre class="pre-scrollable">
@@ -290,7 +291,7 @@ for outCh in range(nOutCh):
 
 <p>Similarly to the 1<sup>st</sup> version, it returns a 4-D tensor of the convolution results with a shape of (<i>nImgSamples, nOutCh, nOutRows, nOutCols</i>). </p>
 
-<h4>4.2. Backward in Version #2</h4>
+<h4><span style="color:darkblue">4.2. Backward in Version #2</span></h4>
 <p>Again, the backward function must return 3 gradients of the loss w.r.t. to <i>inX</i>, <i>in_weight</i> and <i>in_bias</i> (if specified, otherwise a <i>None</i>) respectively, plus a <i>None</i> for convparam that is just a tuple of parameters and does not require gradient. </p>
 
 <p>It uses the same 3 nested <i>for</i> loops to compute the gradients and the core part is listed below. Inside the center of the loops, it also follows the two key ideas of the backpropagation chain rule: 1) summation of all paths and 2) product of upstream and local gradients along each path. Pleate note that, in calculation of the gradients of the kernel (<i>grad_weight</i>), the results are summed with <i>sum(axis=0)</i> because the kernel is applied to all samples, which is the 1<sup>st</sup> dimension (<i>axis=0</i>). The same logic applies to grad_bias too. </p>
@@ -321,7 +322,7 @@ if in_bias is not None:
 
   
 
-<h3><a name="_Validation"></a>5. Validation against Torch built-ins   </h3>
+<h3><a name="_Validation"></a><span style="color:darkblue">5. Validation against Torch built-ins   </span></h3>
 <p>To validate our custom implementations, we build a small <strong><i>Conv2d-LeakyReLU-Mean</i></strong> network (Figure 5) and compared the outputs and autograd results with the Torch built-in implementation<sup>[<a href="#_Reference1">1</a>]</sup>. The <i>LeakyReLU</i> layer is also custom implemented and <a href="https://github.com/coolgpu/Demo_Conv2d_forward_and_backward/blob/master/myLeakyReLU.py">the source code can be found here</a>. The validation code can be found <a href="https://github.com/coolgpu/Demo_Conv2d_forward_and_backward/blob/master/Test_my_conv2d_leakyReLU_forward_backward.py">here</a>. Results show that both implementations of Conv2d produced the same results as the Torch built-ins, including the output and the gradients w.r.t. the input, kernel and bias. </p>
 
 <p align="center">
@@ -330,10 +331,10 @@ if in_bias is not None:
 </p> 
     
 
-<h3><a name="_Summary"></a>6. Summary </h3> 
+<h3><a name="_Summary"></a><span style="color:darkblue">6. Summary </span></h3> 
 <p>In this post, we discussed the fundamentals of Conv2d and demonstrated how to implement its forward and backward autograd functions using 2 different ways. In the end, we built a simple <strong><i>Conv2d-LeakyReLU-Mean</i></strong> network to test our implementations. Only Conv2d is used as example, but all ideas can be extended to Conv1d and Conv3d. We hope that, by going through this example, it can help us obtain a deeper understanding of the convolution in neural networks. In next post, we will move to ConvTranpose. </p>
 
-<h3><a name="_Extra"></a>7.	Extra – Edge detection and Smoothing using pre-defined kernels</h3>
+<h3><a name="_Extra"></a><span style="color:darkblue">7.	Extra – Edge detection and Smoothing using pre-defined kernels</span></h3>
 <p>While the convolution kernel and bias are learnable parameters in convolutional neural networks, standalone Conv2d can also be used to perform specific tasks using pre-defined kernels. In this section, we would like to demonstrate two applications of Conv2d: edge detection and smoothing. In both examples, we use the same input image as shown in Figure 6. </p>
 
 <p align="center">
@@ -342,8 +343,8 @@ if in_bias is not None:
 </p> 
    
 
-<h4>7.1.	Sobel edge detection using Conv2d</h4>
-<p>Sobel filter<sup>[<a href="#_Reference2">2</a>]</sup> is used in the edge detection example. Two 3x3 Sobel kernels are given by </p>
+<h4><span style="color:darkblue">7.1. Sobel edge detection using Conv2d</span></h4>
+<p>Sobel filter<sup>[<a href="#_Reference2">2</a>]</sup> is used in this example to demonstrate application of Conv2d in edge detection tasks. Two 3x3 Sobel kernels are given by </p>
 
 
 <div class="alert alert-secondary equation">
@@ -365,7 +366,7 @@ if in_bias is not None:
 </p> 
 
 
-<h4>7.2.	Gaussian blurring using Conv2d</h4>
+<h4><span style="color:darkblue">7.2.	Gaussian blurring using Conv2d</span></h4>
 <p>A normalized 5x5 Gaussian kernel is given by </p>
 
 <div class="alert alert-secondary equation">
@@ -388,7 +389,7 @@ if in_bias is not None:
 
 
 
-<h3><a name="_References"></a>8. References</h3> 
+<h3><a name="_References"></a><span style="color:darkblue">8. References</span></h3> 
 <ul>
 	<li><a name="_Reference1"></a>[1] <a href="https://pytorch.org/docs/stable/generated/torch.nn.Conv2d.html"> Conv2d - PyTorch documentation. </a></li>
 	<li><a name="_Reference2"></a>[2] <a href="https://en.wikipedia.org/wiki/Sobel_operator"> Sobel operator on Wikipedia. </a></li>
