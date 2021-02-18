@@ -1,7 +1,7 @@
 ---
 layout: post
 mathjax: true
-title:  "Understanding Conv2d and ConvTrans2d in Neural Networks - Part 2. Convolution and Its Gradients"
+title:  "Understanding Conv2d and ConvTrans2d in Neural Networks - Part 2. Convolution, Its Gradients and Custom Implementations"
 date:   2020-10-04 9:45:00 -0700
 categories: github pages
 author: Xiyun Song
