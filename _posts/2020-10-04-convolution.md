@@ -11,9 +11,9 @@ author: Xiyun Song
 
 
 <ul>
-	<li><a href="https://coolgpu.github.io/coolgpu_blog/github/pages/2020/09/22/matrixmultiplication.html">Matrix multiplication and its custom implementation</a></li>
-	<li><a href="">Conv2d and its gradients (this post)</a></li>
-	<li>ConvTranpose2d and its gradients </li>
+	<li><a href="https://coolgpu.github.io/coolgpu_blog/github/pages/2020/09/22/matrixmultiplication.html">Matrix Multiplication, Its Gradients and Custom Implementations</a></li>
+	<li><a href="">Convolution, Its Gradients and Custom Implementations (this post)</a></li>
+	<li><a href="https://coolgpu.github.io/coolgpu_blog/github/pages/2021/02/18/transposed_convolution.html">Transposed Convolution and Custom Implementations</a> </li>
 	<li>Momentum, RMSProp and Adam Optimizers </li>
 	<li>Application of Conv2d and ConvTranpose2d in Neural Networks</li>
 </ul>
