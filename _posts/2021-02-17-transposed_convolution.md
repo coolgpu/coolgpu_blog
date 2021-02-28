@@ -1,7 +1,7 @@
 ---
 layout: post
 mathjax: true
-title:  "Understanding Conv2d and ConvTrans2d in Neural Networks - Part 3. Transposed Convolution and Custom Implementations"
+title:  "Understanding Artificial Neural Networks with Hands-on Experience - Part 3. Transposed Convolution and Custom Implementations"
 date:   2021-02-17 19:00:00 -0700
 categories: github pages
 author: Xiyun Song

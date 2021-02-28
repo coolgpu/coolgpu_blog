@@ -1,7 +1,7 @@
 ---
 layout: post
 mathjax: true
-title:  "Understanding Backpropagation of Neural Networks Using an Example with Step-by-step Derivation and Custom Implementations"
+title:  "Understanding Backpropagation of Artificial Neural Networks Using an Example with Step-by-step Derivation and Custom Implementations"
 date:   2020-09-13 21:46:41 -0700
 categories: github pages
 author: Xiyun Song

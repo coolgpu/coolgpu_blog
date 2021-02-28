@@ -1,7 +1,7 @@
 ---
 layout: post
 mathjax: true
-title:  "Understanding Conv2d and ConvTrans2d in Neural Networks - Part 1. Matrix Multiplication, Its Gradients and Custom Implementations"
+title:  "Understanding Artificial Neural Networks with Hands-on Experience - Part 1. Matrix Multiplication, Its Gradients and Custom Implementations"
 date:   2020-09-22 07:46:41 -0700
 categories: github pages
 author: Xiyun Song
