@@ -10,12 +10,11 @@ author: Xiyun Song
 <p>Convolution is the most widely used and important layer in deep learning neural networks for image classification or regression tasks. Its counterpart, transpose convolution or typically named as ConvTranspose, is also widely used in networks (e.g. U-Net<sup>[<a href="#_Reference1">1</a>]</sup>, ResNet<sup>[<a href="#_Reference2">2</a>]</sup>) that requires re-sampling data back to the original image size so that they can be added to or concatenated with the original data to form skip layers. Due to the complexity involved in the forward and backward computation, both convolution and ConvTranspose do not seem as straightforward as other modules. Therefore, we plan to use the following 4 posts to explain the fundamentals of convolution and ConvTranspose with examples of custom implementations and hope to help clarify these concepts. </p>
 
 <ul>
-	<li><a href="">Matrix Multiplication, Its Gradients and Custom Implementations (this post)</a></li>
-	<li><a href="https://coolgpu.github.io/coolgpu_blog/github/pages/2020/10/04/convolution.html">Convolution, Its Gradients and Custom Implementations</a></li>
-	<li><a href="https://coolgpu.github.io/coolgpu_blog/github/pages/2021/02/18/transposed_convolution.html">Transposed Convolution and Custom Implementations</a> </li>
-	<li>Momentum, RMSProp and Adam Optimizers </li>
-	<li>Momentum, RMSProp and Adam Optimizers </li>
-	<li>Application of Conv2d and ConvTranpose2d in Neural Networks</li>
+	<li><a href="https://coolgpu.github.io/coolgpu_blog/github/pages/2020/09/22/matrixmultiplication.html">Matrix Multiplication, Its Gradients and Custom Implementations (this post)</a></li>
+	<li><a href="https://coolgpu.github.io/coolgpu_blog/github/pages/2020/10/04/convolution.html">Convolution, Its Gradients and Custom Implementations </a></li>
+	<li><a href="https://coolgpu.github.io/coolgpu_blog/github/pages/2021/02/18/transposed_convolution.html">Transposed Convolution and Custom Implementations </a></li>
+	<li><a href="https://coolgpu.github.io/coolgpu_blog/github/pages/2021/03/04/optimization.html">Optimization and optimizers with Custom Implementations and A Case Study </a> </li>
+	<li>Application of Conv2d, ConvTranpose2d and Optimizers in Neural Networks</li>
 </ul>
 
 

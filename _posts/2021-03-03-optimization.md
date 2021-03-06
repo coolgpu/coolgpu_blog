@@ -14,7 +14,7 @@ author: Xiyun Song, PhD
 	<li><a href="https://coolgpu.github.io/coolgpu_blog/github/pages/2020/09/22/matrixmultiplication.html">Matrix Multiplication, Its Gradients and Custom Implementations</a></li>
 	<li><a href="https://coolgpu.github.io/coolgpu_blog/github/pages/2020/10/04/convolution.html">Convolution, Its Gradients and Custom Implementations </a></li>
 	<li><a href="https://coolgpu.github.io/coolgpu_blog/github/pages/2021/02/18/transposed_convolution.html">Transposed Convolution and Custom Implementations </a></li>
-	<li><a href="">Optimization and optimizers (Gradient Descent, GD with Momentum, RMSProp and Adam Optimizers)</a> </li>
+	<li><a href="https://coolgpu.github.io/coolgpu_blog/github/pages/2021/03/04/optimization.html">Optimization and optimizers with Custom Implementations and A Case Study (this post)</a> </li>
 	<li>Application of Conv2d, ConvTranpose2d and Optimizers in Neural Networks</li>
 </ul>
 
