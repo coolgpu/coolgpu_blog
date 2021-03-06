@@ -1,7 +1,7 @@
 ---
 layout: post
 mathjax: true
-title:  "Understanding Artificial Neural Networks with Hands-on Experience - Part 4. Optimization and Optimizers"
+title:  "Understanding Artificial Neural Networks with Hands-on Experience - Part 4. Optimization and Optimizers with Custom Implementations and A Case Study"
 date:   2021-03-03 21:00:00 -0700
 categories: github pages
 author: Xiyun Song, PhD
