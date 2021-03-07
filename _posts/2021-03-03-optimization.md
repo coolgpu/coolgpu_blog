@@ -221,7 +221,7 @@ A commonly used value for \(\beta \) is \(0.9\). When \(\beta  = 0\), this algor
 </div>
 
 
-<p>where \(A = 1.261845\) is half length of the semi-major axis and \(B = 1.234378\) is half length of the semi-minor axis in unit of \(AU\). The offset of \(0.26185\) in x-axis is half of the distance between the two foci. This offset shows up in Equation (16) because the origin of the coordinate system is chosen to be at the center of the Sun (one of the two foci) instead of the center of the ellipse. </p>
+<p>where \(A = 1.261845\) is the length of semi-major axis and \(B = 1.234378\) is the length of semi-minor axis in unit of \(AU\). The offset of \(0.26185\) in x-axis is half of the distance between the two foci. This offset shows up in Equation (16) because the origin of the coordinate system is chosen to be at the center of the Sun (one of the two foci) instead of the center of the ellipse. </p>
 
 <p align="center">
  <img src="{{ "/assets/images/Part4_Fig6_illustrate_orbits.png" | relative_url }}" style="border:solid; color:gray" width="600"> 
