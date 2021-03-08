@@ -4,7 +4,7 @@ mathjax: true
 title:  "Understanding Artificial Neural Networks with Hands-on Experience - Part 1. Matrix Multiplication, Its Gradients and Custom Implementations"
 date:   2020-09-22 07:46:41 -0700
 categories: github pages
-author: Xiyun Song
+author: Xiyun Song, PhD
 ---
 
 <p>Convolution is the most widely used and important layer in deep learning neural networks for image classification or regression tasks. Its counterpart, transpose convolution or typically named as ConvTranspose, is also widely used in networks (e.g. U-Net<sup>[<a href="#_Reference1">1</a>]</sup>, ResNet<sup>[<a href="#_Reference2">2</a>]</sup>) that requires re-sampling data back to the original image size so that they can be added to or concatenated with the original data to form skip layers. Due to the complexity involved in the forward and backward computation, both convolution and ConvTranspose do not seem as straightforward as other modules. Therefore, we plan to use the following 4 posts to explain the fundamentals of convolution and ConvTranspose with examples of custom implementations and hope to help clarify these concepts. </p>

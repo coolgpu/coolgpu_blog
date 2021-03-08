@@ -4,7 +4,7 @@ mathjax: true
 title:  "Understanding Backpropagation of Artificial Neural Networks Using an Example with Step-by-step Derivation and Custom Implementations"
 date:   2020-09-13 21:46:41 -0700
 categories: github pages
-author: Xiyun Song
+author: Xiyun Song, PhD
 ---
 
 <p>A neural network model typically learns from iterative training processes to optimize values for its trainable parameters. The major steps in each iteration include forward pass, loss calculation, backward pass and parameter update. </p>

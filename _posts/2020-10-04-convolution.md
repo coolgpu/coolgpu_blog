@@ -4,7 +4,7 @@ mathjax: true
 title:  "Understanding Artificial Neural Networks with Hands-on Experience - Part 2. Convolution, Its Gradients and Custom Implementations"
 date:   2020-10-04 9:45:00 -0700
 categories: github pages
-author: Xiyun Song
+author: Xiyun Song, PhD
 ---
 
 <p>In the previous post, we discussed matrix multiplication and derivation of its gradients. In this post, we will talk about convolution, the 2<sup>nd</sup> part of the series. </p>

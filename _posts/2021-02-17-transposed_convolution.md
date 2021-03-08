@@ -4,7 +4,7 @@ mathjax: true
 title:  "Understanding Artificial Neural Networks with Hands-on Experience - Part 3. Transposed Convolution and Custom Implementations"
 date:   2021-02-17 19:00:00 -0700
 categories: github pages
-author: Xiyun Song
+author: Xiyun Song, PhD
 ---
 
 <p>Time flies. In the last post from September 2020, we discussed convolution for neural networks and how to implement its forward and backward propagations. In this post, we will talk about transposed convolution, the 3<sup>rd</sup> part of the series.</p>
