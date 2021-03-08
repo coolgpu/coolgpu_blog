@@ -2,7 +2,7 @@
 layout: post
 mathjax: true
 title:  "Animation of Earth-to-Mars Spacecraft Trajectory -- from Physics to Math to Programming"
-date:   2021-03-07 13:00:00 -0700
+date:   2021-03-07 21:00:00 -0700
 categories: github pages
 author: Xiyun Song, PhD
 ---
