@@ -28,23 +28,12 @@ author: Xiyun Song, PhD
 
 <p>Due to the presence of gravity and the facts that both Earth and Mars are moving, the spacecraft is not aiming at where Mars is at launch time and fly in a straight line. Instead, it aims at a point ahead of the current location of Mars, so that when the spacecraft arrives that point, Mars also arrives at the exactly right time. </p>
 
-<p>With different launch speed, the spacecraft can fly along a variety of elliptical paths and meet the orbit of Mars at different location. Among these single-elliptical orbit, Hohmann transfer orbit the most efficient one that requires the least launch fuel. Hohmann Transfer Orbit refers to the elliptical orbit that touches the Earth orbit at Hohmann perihelion at launch time and touches the Mars orbit at Hohmann aphelion at arrival time, as shown in Figure 1. </p>
+<p>With different launch speed, the spacecraft can fly along a variety of elliptical paths and meet the orbit of Mars at different location. Among these single-elliptical orbit, Hohmann transfer orbit the most efficient one that requires the least launch fuel. Hohmann Transfer Orbit refers to the elliptical orbit that touches the Earth orbit at Hohmann perihelion at launch time and touches the Mars orbit at Hohmann aphelion at arrival time, as shown in Figure 1. Please note that the Perseverance Rover didn't take the Hohmann transfer orbit. Instead, it aimed at an orbit "higher" than the Hohmann orbit with a higher launch speed. That orbit gives a shorter travel distance and takes less time (about 203 days) to reach Mars orbit, but also makes slowing down and landing more challenging.  </p>
 
 <p align="center">
  <img src="{{ "/assets/images/Post6_Figure1_Static_orbits.png" | relative_url }}" style="border:solid; color:gray" width="600"> 
 <br>Figure 1 Illustration of the rotating orbits of Earth, Mars and the spacecraft launch to Mars. 
 </p> 
-
-<p>Assumptions</p>
-
-<ul>
-	<li>Assume both Earth and Mars are rotating around the Sun in circular orbits with constant speeds. We use their individual average distances from the Sun as the radii \({R_{Earth}} = 1\;AU\) and \({R_{Mars} } = 1.52\;AU\)(Astronomical Unit, roughly the distance from Earth to the Sun, \(1.495978707 \times {10^{11} }\) m). Please note, in reality, their orbits are slightly elliptical, especially for Mars.</li>
-	<li>Assume the orbits of Earth and Mars are in the same plane. </li>
-	<li>Rocket acceleration at launch and deceleration at arrival are not taken into account in this animation.</li>
-</ul>
-
-<p>These assumptions are not exactly true, but quite close and reasonable. The purpose is to simplify calculation for the animation. </p>
-
 
 
 <h3><a name="_Task"></a><span style="color:darkblue">2. Task – Animation of the trajectories</span></h3> 
@@ -55,6 +44,16 @@ author: Xiyun Song, PhD
 	<li>Also simulate the motion of both Earth and Mar at the same time. </li>
 	<li>Also display information of the lapsed time, speed of the spacecraft, the distance from the spacecraft to Earth, Mars and Sun, respectively.</li>
 </ul>
+
+<p>This task involves use of the knowledge and skills in physics, mathematics and programming. To simplify task, a few assumptions are made here:</p>
+
+<ul>
+	<li>Assume both Earth and Mars are rotating around the Sun in circular orbits with constant speeds. We use their individual average distances from the Sun as the radii \({R_{Earth}} = 1\;AU\) and \({R_{Mars} } = 1.52\;AU\)(Astronomical Unit, \(1 AU\) is roughly the distance from Earth to the Sun, \(1.495978707 \times {10^{11} }\) m). Please note, in reality, their orbits are slightly elliptical, especially for Mars.</li>
+	<li>Assume the orbits of Earth and Mars are in the same plane. </li>
+	<li>Rocket acceleration at launch and deceleration at arrival are not taken into account in this animation.</li>
+</ul>
+
+<p>These assumptions are not exactly true in reality, but quite close and reasonable. </p>
 
 
 <h3><a name="_Physics"></a><span style="color:darkblue">3. Physics</span></h3> 
