@@ -371,7 +371,7 @@ anim.save('Animation_Of_Planet_Orbits.mp4', fps=30, bitrate=1800, extra_args=['-
 
 <p>More <code class="python">extra_args</code> can be passed in to specify the format of the output video. If not specified, the default settings will be used. To support the save feature, ffmpeg <sup>[<a href="#_Reference6">6</a>]</sup> need to be installed and can be found here. </p>
 
-<p>The video below shows the result of this animation project. Enjoy. Just in case the video cannot be played in your browser, please try it with another browser such as firefox, Chrome or IE. You can also download the <a href="{{ "/assets/images/Post6_video1_Animation_Of_Planet_Orbits.mp4" | relative_url }}">mp4 video here and then play it. </p> 
+<p>The video below shows the result of this animation project. Enjoy. Just in case the video cannot be played in your browser, please try it with another browser such as firefox, Chrome or IE. You can also download the <a href="{{ "/assets/images/Post6_video1_Animation_Of_Planet_Orbits.mp4" | relative_url }}">mp4 video here</a> and then play it. </p> 
 
 
 <p align="center">
