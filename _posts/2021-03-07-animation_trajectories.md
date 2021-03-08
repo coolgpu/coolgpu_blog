@@ -17,6 +17,7 @@ author: Xiyun Song, PhD
 	<li><a href="#_Physics">Physics</a></li>
 	<li><a href="#_Mathematics">Mathematics</a></li>
 	<li><a href="#_Implementations">Implementations </a></li>
+	<li><a href="#_Results">Results </a></li>
     <li><a href="#_Summary">Summary</a></li>
 	<li><a href="#_References">References</a></li>
 </ul>
@@ -371,8 +372,10 @@ anim.save('Animation_Of_Planet_Orbits.mp4', fps=30, bitrate=1800, extra_args=['-
 
 <p>More <code class="python">extra_args</code> can be passed in to specify the format of the output video. If not specified, the default settings will be used. To support the save feature, ffmpeg <sup>[<a href="#_Reference6">6</a>]</sup> need to be installed and can be found here. </p>
 
-<p>The video below shows the result of this animation project. Enjoy. Just in case the video cannot be played in your browser, please try it with another browser such as firefox, Chrome or IE. You can also download the <a href="{{ "/assets/images/Post6_video1_Animation_Of_Planet_Orbits.mp4" | relative_url }}">mp4 video here</a> and then play it. </p> 
 
+<h3><a name="_Results"></a><span style="color:darkblue">6. Results </span></h3> 
+
+<p>The video below is the result of this animation project. Enjoy. Just in case the video cannot be played in your browser, please try it with another browser such as firefox, Chrome or IE. You can also download the <a href="{{ "/assets/images/Post6_video1_Animation_Of_Planet_Orbits.mp4" | relative_url }}">mp4 video here</a>. </p> 
 
 <p align="center">
 <video width="640" height="640" controls>
@@ -383,14 +386,14 @@ anim.save('Animation_Of_Planet_Orbits.mp4', fps=30, bitrate=1800, extra_args=['-
 <br>
 
 
-<h3><a name="_Summary"></a><span style="color:darkblue">6. Summary </span></h3> 
+<h3><a name="_Summary"></a><span style="color:darkblue">7. Summary </span></h3> 
 <p>In this post, we demonstrated how to animate the trajectories of Earth, Mars and the spacecraft launched from Earth to Mars via the Hohmann Transfer Orbit. This project involves interesting knowledge in physics behind the story, math for solving the problem, and programming to implement the solution. So we went over the details and steps from physics to math to programming. In the end, the objects “really fly in the animation” as designed and expected. Cheers! </p>
 
 <p>And, our salute to those pioneers, scientists, engineering, workers and all people who worked hard to make those accomplishments happen, including the Perseverance Rover and a lot more. 
 </p>
 
 
-<h3><a name="_References"></a><span style="color:darkblue">7. References</span></h3> 
+<h3><a name="_References"></a><span style="color:darkblue">8. References</span></h3> 
 <ul>
     <li><a name="_Reference1"></a>[1] <a href="https://www.nasa.gov/perseverance"> NASA Perseverance Rover landing on Mars. </a></li>
 
