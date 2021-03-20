@@ -199,7 +199,7 @@ author: Xiyun Song, PhD
 <br>Figure 9 Animation of the four optimizers’ update paths from the starting point to the minimum loss using different learning rates. 
 </p>
 
-<p> For the two test cases that failed (using the learning rate of \(0.012\) that is too big and \(0.00015\) that is too small), we would like to see whether more epochs help or not. Therefore, we increased the number of epochs from \(100\) to \(400\). The results (Figures 10 and 11 below) show that it did help. Animation in Figure 12 illustrates how the additional epochs help the training continue to converge. </p>
+<p> For the two failed test cases (using the learning rate of \(0.012\) that is too big and \(0.00015\) that is too small), we would like to see whether more epochs help or not. Therefore, we increased the number of epochs from \(100\) to \(400\). The results (Figures 10 and 11 below) show that it did help. Animation in Figure 12 illustrates how the additional epochs help the training continue to converge. </p>
 
 <p align="center">
  <img src="{{ "/assets/images/Part5/Part5_Fig10_Sect2.2_SGD_Momentum_lr0.012_Epoch400.png" | relative_url }}" style="border:solid; color:gray" width="600"> 
@@ -261,10 +261,10 @@ for t in range(epoch):
 
 <p> In PyTorch, a scheduler object always takes an optimizer as well as some optional parameters as the input arguments for its constructor. The object should be instantiated before the training loop and be applied after the optimizer’s update inside the loop. The following code shows an example that uses <code class="python">MultiStepLR</code> scheduler. Other types of schedulers can be used in a similar way, but may require different arguments. </p>
 
-<p> MultiStepLR scheduler decays the learning rate in the optimizer by a multiplicative factor (named gamma) once the number of updates reaches one of the milestones in a pre-defined list. The factor gamma, \(\gamma \), should be between \(0\) and \(1\) so that the learning rate decreases. Mathematically, the adjustment of learning rate, \(\alpha \), can be written as </p>
+<p> MultiStepLR scheduler decays the learning rate in the optimizer by a multiplicative factor (named gamma) once the number of updates reaches one of the milestones in a pre-defined list. The factor gamma, \(\gamma \), should be between \(0\) and \(1\) so that the learning rate decreases. Mathematically, the adjustment of learning rate \(\alpha \) at \(t\)-th can be written as </p>
 
 <div class="alert alert-secondary equation">
-	<span>\({\alpha ^{\left( k \right)} } = {\alpha ^{\left( {k - 1} \right)} } \cdot \gamma \), if \(k\) is a milestone; otherwise, no change.  </span><span class="ref-num"> (10)</span>
+	<span>\({\alpha ^{\left( t \right)} } = {\alpha ^{\left( {t - 1} \right)} } \cdot \gamma \), if \(t\) is a milestone; otherwise, no change.  </span><span class="ref-num"> (10)</span>
 </div>
 
 <p> In this experiment, we tested the following configurations: </p>
@@ -295,10 +295,10 @@ for t in range(epoch):
 
 
 <div class="alert alert-secondary equation">
-	<span>\({\alpha ^{\left( k \right)} } = {\alpha ^{\left( {k - 1} \right)} } \cdot lambda\left( k \right)\)   </span><span class="ref-num"> (11)</span>
+	<span>\({\alpha ^{\left( t \right)} } = {\alpha ^{\left( {t - 1} \right)} } \cdot lambda\left( t \right)\)   </span><span class="ref-num"> (11)</span>
 </div>
 
-<p> where \(k\) denotes the count of updates. </p>
+<p> where \(t\) denotes the count of updates. </p>
 
 <p> In this experiment, we tested the following configurations: </p>
 
