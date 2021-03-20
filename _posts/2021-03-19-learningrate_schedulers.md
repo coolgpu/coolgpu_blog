@@ -155,7 +155,7 @@ author: Xiyun Song, PhD
 
 <h4><a name="_Tuneup"></a><span style="color:darkblue">2.2.	Impact of different learning rates and tune-up  </span></h4>
 
-<p> In this experiment we use the SGD_momentum optimizer as an example to investigate the impact of using different learning rates on training. A total of \(5\) learning rates are tested, including (from greatest to smallest) \(0.012\), \(0.01\), \(0.005\), \(0.001\) and \(0.00015\). In each test case, the learning rate remains unchanged through the process of training. \(Epoch = 100\) is used these test cases. Please see the source code here for generating data and here for making animation. Figures (4) through (8) show the regression results coming out from the training using these learning rates. </p>
+<p> In this experiment we use the SGD_momentum optimizer as an example to investigate the impact of using different learning rates on training. A total of \(5\) learning rates are tested, including (from greatest to smallest) \(0.012\), \(0.01\), \(0.005\), \(0.001\) and \(0.00015\). In each test case, the learning rate remains unchanged through the process of training. \(Epoch = 100\) is used these test cases. Figures (4) through (8) show the regression results coming out from the training using these learning rates. </p>
 
 <p align="center">
  <img src="{{ "/assets/images/Part5/Part5_Fig4_Sect2.2_SGD_Momentum_lr0.012_Epoch100.png" | relative_url }}" style="border:solid; color:gray" width="600"> 
