@@ -15,7 +15,7 @@ author: Xiyun Song, PhD
 	<li><a href="https://coolgpu.github.io/coolgpu_blog/github/pages/2020/10/04/convolution.html">Convolution, Its Gradients and Custom Implementations </a></li>
 	<li><a href="https://coolgpu.github.io/coolgpu_blog/github/pages/2021/02/18/transposed_convolution.html">Transposed Convolution and Custom Implementations </a></li>
 	<li><a href="https://coolgpu.github.io/coolgpu_blog/github/pages/2021/03/04/optimization.html">Optimization and optimizers with Custom Implementations and A Case Study (this post)</a> </li>
-	<li>Application of Conv2d, ConvTranpose2d and Optimizers in Neural Networks</li>
+	<li><a href="https://coolgpu.github.io/coolgpu_blog/github/pages/2021/03/20/learningrate_schedulers.html">Hyper-Parameter Learning Rate and Schedulers (this post)</a></li>
 </ul>
 
 <p>In the previous posts, we have been continuously focused on gradients and backpropagation, which is the most important and also most difficult part of understanding neural network principles. With that being covered, we are moving to another important topic – optimization. More specifically, we will talk about fundamentals of optimization and several widely used optimizers, and then use a case study to demonstrate how to implement and use them in a network. For your convenience, this post is organized into the following sections. </p>

@@ -15,7 +15,7 @@ author: Xiyun Song, PhD
 	<li><a href="https://coolgpu.github.io/coolgpu_blog/github/pages/2020/10/04/convolution.html">Convolution, Its Gradients and Custom Implementations </a></li>
 	<li><a href="https://coolgpu.github.io/coolgpu_blog/github/pages/2021/02/18/transposed_convolution.html">Transposed Convolution and Custom Implementations (this post)</a></li>
 	<li><a href="https://coolgpu.github.io/coolgpu_blog/github/pages/2021/03/04/optimization.html">Optimization and optimizers with Custom Implementations and A Case Study </a> </li>
-	<li>Application of Conv2d, ConvTranpose2d and Optimizers in Neural Networks</li>
+	<li><a href="https://coolgpu.github.io/coolgpu_blog/github/pages/2021/03/20/learningrate_schedulers.html">Hyper-Parameter Learning Rate and Schedulers (this post)</a></li>
 </ul>
 
 <p>In a similar way as we did for Convolution in the previous post, we will use the 2-D (for image height and width) scenario as an example to explain the concept of transposed convolution and demonstrate how to implement our own versions, including both forward and backward propagation. The basic ideas can be extended to 1-D and 3-D as well. Here are the outlines of this post. </p>
