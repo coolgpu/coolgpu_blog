@@ -70,7 +70,7 @@ author: Xiyun Song, PhD
 
 <p align="center">
  <img src="{{ "/assets/images/Part4_Fig2_Loss_contour_ith_Arrows.png" | relative_url }}" style="border:solid; color:gray" width="600"> 
-<br>Figure 2Illustration of gradient descent in an example of loss function with 2 learnable parameters. 
+<br>Figure 2 Illustration of gradient descent in an example of loss function with 2 learnable parameters. 
 </p> 
 
 <p>Mathematically, let’s consider a regression case: the training dataset contains \(N\) separate samples, where the input of the \(i\)-th sample is \({X_i}\) and its target is \({Y_i}\),  and the network has \(M\) learnable parameters \(\left( { {w_1}, \cdots ,{w_M} } \right)\). The predicted output \({\hat Y_i}\) from the network for each sample can be written as  </p>
@@ -230,7 +230,7 @@ A commonly used value for \(\beta \) is \(0.9\). When \(\beta  = 0\), this algor
 
 <p>Using Equation (16), we sampled \(512\) \(\left( {N = 512} \right)\) points \(\left( { {X_i},{Y_i} } \right)\) of the Hohmann Transfer Orbit and then added random noise to the samples. The \(512\) samples are shown as the green dots in Figure 6.</p> 
 
-<p>Now the task is, given the \(512\) samples and Equation (16) of an ellipse with unknown parameters \(A\) and \(B\), to find out what the values of \(A\) and \(B\) should be. This is a typical regress problem and can be solved using various mathematical ways. In this post, we will use neural networks with the discussed optimization algorithms to solve the problem. </p> 
+<p>Now the task is, given the \(512\) samples and Equation (16) of an ellipse with unknown parameters \(A\) and \(B\), to find out what the values of \(A\) and \(B\) should be. This is a typical regress problem and can be solved using various mathematical ways. In this post, we will use neural networks with the discussed optimization algorithms to solve the problem. For the purpose of demonstration, we will assume the parameters \(A\) and \(B\) are independent, so the networks will have two learnable parameters, one for \(A\) and the other one for \(B\).</p> 
 
 
 <h3><a name="_Implementations"></a><span style="color:darkblue">4. Implementations of the network and optimizers </span></h3>
@@ -374,7 +374,7 @@ else:  # do the same job using Torch built-in autograd and optim
 <video width="640" height="640" controls>
 <source src="{{ "/assets/images/Part4_Video1.mp4" | relative_url }}" type="video/mp4">
 </video> 
-<br>Figure 11: Animation of the 4 optimizers’ update paths from the starting point to the minimum loss. 
+<br>Figure 11 Animation of the 4 optimizers’ update paths from the starting point to the minimum loss. 
 </p>
 <br>
 
