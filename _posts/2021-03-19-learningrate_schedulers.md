@@ -174,7 +174,7 @@ author: Xiyun Song, PhD
 
 <p align="center">
  <img src="{{ "/assets/images/Part5/Part5_Fig7_Sect2.2_SGD_Momentum_lr0.001_Epoch100.png" | relative_url }}" style="border:solid; color:gray" width="600"> 
-<br>Figure 6 Regression result from SGD_Momentum training (epoch=100 and learning rate=0.001). 
+<br>Figure 7 Regression result from SGD_Momentum training (epoch=100 and learning rate=0.001). 
 </p> 
 
 <p align="center">
@@ -335,7 +335,7 @@ scheduler = torch.optim.lr_scheduler.MultiplicativeLR(optimizer, lr_lambda=lambd
 
 <h3><a name="_References"></a><span style="color:darkblue">5. References</span></h3> 
 <ul>
-    <li><a name="_Reference1"></a>[1] <a href="https://pytorch.org/docs/stable/optim.html"> (PyTorch) How to adjust learning rate (the second half in this page). </a></li>
+    <li><a name="_Reference1"></a>[1] <a href="https://pytorch.org/docs/stable/optim.html"> (PyTorch) How to adjust learning rate (the second half in the page). </a></li>
 
 </ul>
 
