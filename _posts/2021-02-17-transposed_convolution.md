@@ -15,7 +15,7 @@ author: Xiyun Song, PhD
 	<li><a href="https://coolgpu.github.io/coolgpu_blog/github/pages/2020/10/04/convolution.html">Convolution, Its Gradients and Custom Implementations </a></li>
 	<li><a href="https://coolgpu.github.io/coolgpu_blog/github/pages/2021/02/18/transposed_convolution.html">Transposed Convolution and Custom Implementations (this post)</a></li>
 	<li><a href="https://coolgpu.github.io/coolgpu_blog/github/pages/2021/03/04/optimization.html">Optimization and optimizers with Custom Implementations and A Case Study </a> </li>
-	<li><a href="https://coolgpu.github.io/coolgpu_blog/github/pages/2021/03/20/learningrate_schedulers.html">Hyper-Parameter Learning Rate and Schedulers (this post)</a></li>
+	<li><a href="https://coolgpu.github.io/coolgpu_blog/github/pages/2021/03/20/learningrate_schedulers.html">Hyper-Parameter Learning Rate and Schedulers </a></li>
 </ul>
 
 <p>In a similar way as we did for Convolution in the previous post, we will use the 2-D (for image height and width) scenario as an example to explain the concept of transposed convolution and demonstrate how to implement our own versions, including both forward and backward propagation. The basic ideas can be extended to 1-D and 3-D as well. Here are the outlines of this post. </p>
@@ -70,25 +70,25 @@ author: Xiyun Song, PhD
 
 <h4><span style="color:darkblue">2.1.	Distribution view of ConvTranspose2d  </span></h4>
 
-<p>Without loss of generality, let’s consider an example of 2D “forward” convolution: a \(5 \times 5\) input matrix (referred to as conv_input) convolved with two \(3 \times 3\) kernel (referred to as conv_kernel) using padding=1 and \(stride=2\), and generates two channels of \(3 \times 3\) output matrices, referred to as \({conv\_output}\). The task for its associated transposed convolution is to transform from the two \({conv\_output}\) matrices back to the conv_input domain. Let’s assume the \({conv\_output}\) matrices to serve as the input of the transposed convolution (also referred to as \({tc\_input}\)) are </p>
+<p>Without loss of generality, let’s consider an example of 2D “forward” convolution: a \(5 \times 5\) input matrix (referred to as \(conv\_input\) ) convolved with two \(3 \times 3\) kernel (referred to as \(conv\_kernel\) ) using \(padding=1\) and \(stride=2\), and generates two channels of \(3 \times 3\) output matrices, referred to as \({conv\_output}\). The task for its associated transposed convolution is to transform from the two \({conv\_output}\) matrices back to the \(conv\_input\) domain. Let’s assume the \({conv\_output}\) matrices to serve as the input of the transposed convolution (also referred to as \({tc\_input}\)) are </p>
 
 <p align="center">
  <img src="{{ "/assets/images/Part3_Fig4_input_matrix_for_TC.png" | relative_url }}" style="border:solid; color:gray" width="600"> 
-<br>Figure 4 Example of the input matices for the associated transposed convolution, which come from the output of the “forward” convolution. 
+<br>Figure 4 Example of the input matices for the \(associated\) transposed convolution, which come from the output of the “forward” convolution. 
 </p> 
 
-<p>And the two kernels of the transposed convolution, referred to as tc_kernel, are </p>
+<p>And the two kernels of the transposed convolution, referred to as \(tc\_kernel\), are </p>
 
 <p align="center">
  <img src="{{ "/assets/images/Part3_Fig5tc_Kernels.png" | relative_url }}" style="border:solid; color:gray" width="600"> 
 <br>Figure 5 The two kernels of the associated transposed convolution. 
 </p> 
 
-<p> Figures 6 and 7 illustrate how the 1<sup>st</sup> two elements in the \({tc\_input}\) are distributed back to the “original” \(5 \times 5\) matrix domain in the transposed convolution operation. The other elements are handled in the same way. Please note a few things in the illustration. </p>
+<p> Figures 6 and 7 illustrate how the 1<sup>st</sup> two elements in the \({tc\_input}\) are distributed back to the “original” \(conv\_input\) \(5 \times 5\) matrix domain via the transposed convolution operation. The other elements are handled in the same way. Please note a few things in the illustration. </p>
 
 <ul>
-	<li>Each element in \({tc\_input}\) contributes back to a total of \(3 \times 3\)=9 elements of original conv_input space via the \(3 \times 3\) tc_kernels. </li>
-	<li>Because padding=1 was used in the forward convolution, each border of the intermediate matrix in the \({tc\_input}\) space (the 3<sup>rd</sup> column in the figures) is also padded by 1 during the mapping in the transposed convolution. </li>
+	<li>Each element in \({tc\_input}\) contributes back to a total of \(3 \times 3\)=9 elements of original \(conv\_input\) space via the \(3 \times 3\) \(tc\_kernels\). </li>
+	<li>Because \(padding=1\) was used in the  “original” forward convolution, each border of the intermediate matrix in the \({tc\_output}\) space (the 3<sup>rd</sup> column in the figures) is also padded by 1 during the mapping in the transposed convolution. </li>
 	<li>Because \(stride=2\) was used in the forward convolution, the mapping in the transposed convolution also jump by 2 over the \({tc\_input}\) space. </li>
 	<li>Individual channels are processed separately and then summed elementwise to give the corresponding output channel results of the final \({tc\_output}\). </li>
 </ul>
@@ -112,7 +112,7 @@ author: Xiyun Song, PhD
 
 <p align="center">
  <img src="{{ "/assets/images/Part3_Fig8_TC_P1_S2_2inCh_Distrib-animation.gif" | relative_url }}" style="border:solid; color:gray" width="600"> 
-<br>Figure 8 Animation of the mathmetical operation of the transposed convolution from distrbution view. 
+<br>Figure 8 Animation of the mathematical operation of the transposed convolution from distrbution view. 
 </p> 
 
 <p>The fundamental idea is quite simple: from the perspective view of the \({tc\_input}\) elements, “I will distribute my value back to whichever elements in the conv_input contributed to me in the forward convolution process, with the weighting factors determined by the tc_kernel.” This is known as distribution view of transposed convolution. Straight-forward and fair.</p>
@@ -128,12 +128,11 @@ author: Xiyun Song, PhD
 </div>
 
 
-
 </p>
-<p> The parameters for the associated transposed convolution are </p>
+<p> The parameters for the \(associated\) transposed convolution are </p>
 
 <ul>
-	<li>New input size: the raw input size is \({N_{xIn\_tc}} = {N_{xOut\_conv}} = 5\) as above. However, because \({S_{x\_conv}} = 2\) was used in the forward convolution to reduce the matrix size, it is intuitive to expect to have a stride less than one (\( < 1.0\))  in the transposed convolution in order to increase the matrix size. This is called fractional stride and is equivalent to inserting \({S_{x\_conv}} - 1\) zeros between columns (and \({S_{y\_conv}} - 1\) zeros between rows). Therefore the new stretched input size is \({N_{xIn\_tc\_new} } = \left( { {N_{xIn\_tc} } - 1} \right) \times {S_{x\_conv}} + 1 = \left( {3 - 1} \right) \times 2 + 1 = 5\) </li>
+	<li>New input size: the raw input size is \({N_{xIn\_tc}} = {N_{xOut\_conv}} = 3\) as above. However, because \({S_{x\_conv}} = 2\) was used in the forward convolution to reduce the matrix size, it is intuitive to expect to have a stride less than one (\( < 1.0\)) in the \(associated\) transposed convolution in order to increase the matrix size. This is called \(fractional stride\) and is equivalent to inserting \({S_{x\_conv}} - 1\) zeros between columns (and \({S_{y\_conv}} - 1\) zeros between rows). Therefore the new stretched input size is \({N_{xIn\_tc\_new} } = \left( { {N_{xIn\_tc} } - 1} \right) \times {S_{x\_conv}} + 1 = \left( {3 - 1} \right) \times 2 + 1 = 5\) </li>
 	<li>Kernel size: kept the same as that in the forward convolution,  \({N_{v\_tc}} = 3\). However, the new \(3 \times 3\) kernel of the transposed convolution need to be flipped in both horizontal and vertical directions.</li>
 	<li>New padding: \({P_{x\_tc} } = {N_{v\_tc}} - 1 - {P_{ {x_{conv} } } } = 3 - 1 - 1 = 1\). </li>
 	<li>New Stride: \({S_{x\_tc} } = 1\) and the fractional stride is realized by inserting \({S_{x/y\_conv} } - 1\) zeros between columns and rows.</li>
