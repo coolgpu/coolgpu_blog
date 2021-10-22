@@ -115,7 +115,7 @@ author: Xiyun Song, PhD
 <br>Figure 8 Animation of the mathematical operation of the transposed convolution from distrbution view. 
 </p> 
 
-<p>The fundamental idea is quite simple: from the perspective view of the \({tc\_input}\) elements, “I will distribute my value back to whichever elements in the conv_input contributed to me in the forward convolution process, with the weighting factors determined by the tc_kernel.” This is known as distribution view of transposed convolution. Straight-forward and fair.</p>
+<p>The fundamental idea is quite simple: from the perspective view of the \({tc\_input}\) elements, “I will distribute my value back to whichever elements in the \(conv\_input\) contributed to me in the forward convolution process, with the weighting factors determined by the \(tc\_kernel\).” This is known as distribution view of transposed convolution. Straight-forward and fair.</p>
 
 <h4><span style="color:darkblue">2.2.	Collection view of ConvTranspose2d  </span></h4>
 
