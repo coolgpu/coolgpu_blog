@@ -259,7 +259,7 @@ for t in range(epoch):
 
 <h4><a name="_MultiStepLR"></a><span style="color:darkblue">3.2.	The <strong>MultiStepLR</strong> scheduler  </span></h4>
 
-<p> <code class="python">MultiStepLR</code> scheduler decays the learning rate in the optimizer by a multiplicative factor (named gamma) once the number of updates reaches one of the milestones in a pre-defined list. The factor gamma, \(\gamma \), should be between \(0\) and \(1\) so that the learning rate decreases. Mathematically, the adjustment of learning rate \(\alpha \) at \(t\)-th can be written as </p>
+<p> <code class="python">MultiStepLR</code> scheduler decays the learning rate in the optimizer by a multiplicative factor (named gamma) once the number of updates (please note: not epochs) reaches the milestones in a pre-defined list. The factor gamma, \(\gamma \), should be between \(0\) and \(1\) so that the learning rate decreases. Mathematically, the adjustment of learning rate \(\alpha \) at \(t\)-th can be written as </p>
 
 <div class="alert alert-secondary equation">
 	<span>\({\alpha ^{\left( t \right)} } = {\alpha ^{\left( {t - 1} \right)} } \cdot \gamma \), if \(t\) is a milestone; otherwise, no change.  </span><span class="ref-num"> (10)</span>
